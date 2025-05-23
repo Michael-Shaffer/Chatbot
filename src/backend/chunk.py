@@ -1,74 +1,51 @@
-from langchain_community.document_loaders import TextLoader, PyPDFDirectoryLoader
-from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
-from langchain.schema import Document
-from unstructured.partition.pdf import partition_pdf
-from unstructured.documents.elements import Table, Image
-import pytesseract
-from PIL import Image as PILImage
-import pandas as pd
+# chunk.py
+# Contains functions for splitting extracted content into smaller chunks.
+# Last updated: 2025-05-22
 
-def process_document(file_path):
-    """Process document and extract text, tables, and figures"""
-    elements = partition_pdf(file_path)
-    processed_content = {
-        'text': [],
-        'tables': [],
-        'figures': []
-    }
-    for element in elements:
-        if isinstance(element, Table):
-            # Convert table to pandas DataFrame and then to string
-            table_data = pd.DataFrame(element.metadata.get('text_as_html'))
-            processed_content['tables'].append(str(table_data))
-        elif isinstance(element, Image):
-            # Extract text from images using OCR
-            try:
-                image = PILImage.open(element.metadata.get('image_path'))
-                image_text = pytesseract.image_to_string(image)
-                processed_content['figures'].append({
-                    'caption': element.metadata.get('caption', ''),
-                    'text': image_text
-                })
-            except Exception as e:
-                print(f"Error processing image: {e}")
-        else:
-            processed_content['text'].append(str(element))
-    return processed_content
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
-def load_pdf(DATA_PATH) -> list[Document]:
-    processed_content = process_document(DATA_PATH)
-    docs = []
-
-    for text in processed_content['text']:
-        docs.append(Document(page_content=text))
-
-    for table in processed_content['tables']:
-        docs.append(Document(page_content=f"[TABLE] {table}"))
+def chunk_extracted_data(extracted_data_list, chunk_size=1000, chunk_overlap=150):
+    """
+    Chunks text content from the extracted data.
+    Table and image content are treated as whole chunks for now.
+    """
+    final_chunks_with_metadata = []
     
-    for figure in processed_content['figures']:
-        figure_text = f"[FIGURE] Caption: {figure['caption']}\nContent: {figure['text']}"
-        docs.append(Document(page_content=figure_text))
-    
-    return docs
-
-def split_docs(docs: list[Document]) -> list[Document]:
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1024,
-        chunk_overlap=128,
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
         length_function=len,
-        add_start_index=True,
-        separators=["\n\n", "\n", " ", ""],
-        keep_separator=True,
-        is_separator_regex=False,
-        strip_whitespace=True
+        add_start_index=True, # Adds 'start_index' to metadata
     )
-    
-    chunks = []
-    for doc in docs:
-        if doc.page_content.startswith("[TABLE]") or doc.page_content.startswith("[FIGURE]"):
-            chunks.append(doc)
+
+    for item_id, item in enumerate(extracted_data_list):
+        item_type = item.get("type", "unknown")
+        content = item.get("content", "")
+        # Preserve all original metadata from the item
+        metadata = {k: v for k, v in item.items() if k != "content"}
+        metadata["original_item_id"] = item_id # Add an ID for the original item
+
+        if item_type == "text":
+            if content:
+                text_chunks = text_splitter.split_text(content)
+                for chunk_index, chunk_text in enumerate(text_chunks):
+                    chunk_metadata = metadata.copy() # Start with item's metadata
+                    # Add chunk-specific metadata (start_index is added by splitter)
+                    chunk_metadata["chunk_id_in_item"] = chunk_index 
+                    final_chunks_with_metadata.append({
+                        "page_content": chunk_text, # LangChain convention for content
+                        "metadata": chunk_metadata
+                    })
+        elif item_type == "table" or item_type == "image":
+            # Treat tables (as Markdown) and image descriptions as single chunks.
+            # You might want to split very large tables further.
+            if content:
+                final_chunks_with_metadata.append({
+                    "page_content": content,
+                    "metadata": metadata 
+                })
         else:
-            chunks.extend(splitter.split_documents([doc]))
-    
-    return chunks 
+            # print(f"Warning: Unknown item type '{item_type}' for item ID {item_id}. Skipping.")
+            pass
+            
+    return final_chunks_with_metadata
