@@ -1,64 +1,66 @@
-from langchain_core.prompts import ChatPromptTemplate
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
-from unstructured.partition.pdf import partition_pdf
-from unstructured.documents.elements import Table, Image
-import pytesseract
-from PIL import Image as PILImage
-import pandas as pd
+# llm.py
+# Contains functions for loading and interacting with the local LLM (Llama.cpp).
+# Last updated: 2025-05-22
 
-# Update model paths to use Hugging Face model IDs directly
-MODEL_ID = "google/gemma-2b-it"  # A good default choice that's freely available
+import os
+from llama_cpp import Llama
 
-def load_model():
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID, 
-        device_map="auto",
-        trust_remote_code=True
-    )
-    model.eval()
-    return model, tokenizer
+# Global variable to cache the LLM instance
+_llm_instance_cache = None
 
-
-def generate_response(context, question, model, tokenizer):
-
-    template = ChatPromptTemplate([
-        ("system", "You are a helpful AI bot, Your name is polaris. \n"),
-        ("system", """Answer the users questions using this context without mentioning that you were given context. 
-                     The context includes text, tables, and figures. When referring to tables or figures, 
-                     be specific about their content but natural in your response.
-                     
-                     Context: {context}\n"""),
-        ("human", "Using the provided context answer this question: {question}\n"),
-        ("ai", "Answer:")
-    ])
-
-    # If context is a dictionary, format it properly
-    if isinstance(context, dict):
-        formatted_context = f"""
-        Main Text: {' '.join(context['text'])}
+def get_llm_instance(model_path, n_gpu_layers=-1, n_ctx=4096):
+    """
+    Loads or returns a cached Llama.cpp model instance.
+    This runs the model directly in the Python process.
+    """
+    global _llm_instance_cache
+    if _llm_instance_cache is None:
+        if not model_path or not os.path.exists(model_path):
+            raise FileNotFoundError(f"LLM model file not found at {model_path}. Please provide a valid path.")
         
-        Tables: {' '.join(context['tables'])}
+        print(f"Loading Llama.cpp model from: {model_path} (n_ctx={n_ctx}, n_gpu_layers={n_gpu_layers})")
+        try:
+            _llm_instance_cache = Llama(
+                model_path=model_path,
+                n_gpu_layers=n_gpu_layers,
+                n_ctx=n_ctx,
+                verbose=False 
+            )
+            print("Llama.cpp model loaded successfully.")
+        except Exception as e:
+            print(f"Error loading Llama.cpp model: {e}")
+            print("Ensure you have the correct GGUF model file and llama-cpp-python installed with appropriate hardware support (e.g., BLAS/AVX2 for CPU, CUDA/Metal for GPU).")
+            raise 
+    return _llm_instance_cache
+
+def get_llm_response_self_contained(prompt_text, llm_model_path_for_init, max_new_tokens=500, current_n_ctx=4096, current_n_gpu_layers=-1):
+    """
+    Gets a response from the self-contained Llama.cpp model using the cached instance.
+    """
+    try:
+        # Ensure the LLM instance is loaded using the provided parameters
+        llm = get_llm_instance(model_path=llm_model_path_for_init, n_ctx=current_n_ctx, n_gpu_layers=current_n_gpu_layers)
         
-        Figures: {' '.join([f"Figure: {fig['caption']} - {fig['text']}" for fig in context['figures']])}
-        """
-    else:
-        formatted_context = context
+        # Llama 3.1 Instruct prompt format
+        # Ensure your prompt_text ALREADY CONTAINS the context and question as per your RAG logic.
+        # This function just handles the final LLM call formatting.
+        system_message = "" # You can add a system message if desired, e.g., for Llama 3.1: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful assistant.<|eot_id|>"
+        
+        # The prompt_text from RAG should be the user's part of the conversation
+        full_prompt_for_llm = f"{system_message}<|start_header_id|>user<|end_header_id|>\n\n{prompt_text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        
+        # print(f"\nSending prompt to self-contained Llama.cpp model...")
+        # print(f"--- PROMPT START ---\n{full_prompt_for_llm}\n--- PROMPT END ---") # For debugging prompt structure
 
-    prompt = template.invoke({"context": formatted_context, "question": question})
-    inputs = tokenizer(prompt.to_string(), return_tensors="pt")
-    streamer = TextStreamer(tokenizer)
-    stop_token_id = tokenizer.encode("<end_of_turn>")[0]
-
-    outputs = model.generate(
-        **inputs,
-        min_length = 200,
-        max_new_tokens = 256,
-        num_beams = 1,
-        do_sample = False,
-        streamer = streamer,
-        # eos_token_id = stop_token_id
-    )
-
-    # response = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    # return response
+        output = llm(
+            full_prompt_for_llm,
+            max_tokens=max_new_tokens,
+            stop=["<|eot_id|>", "<|end_of_text|>"], # Common stop tokens for Llama 3
+            echo=False 
+        )
+        response_text = output['choices'][0]['text'].strip()
+        # print("LLM response received.")
+        return response_text
+    except Exception as e:
+        print(f"Error during Llama.cpp inference: {e}")
+        return "Sorry, I encountered an error trying to generate a response with the local LLM."
