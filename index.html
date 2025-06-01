@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaris</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        /* Main container that holds all stars */
+        .sky {
+            position: relative;
+            width: 1800px;
+            height: 1600px;
+        }
+        
+        .star {
+            width: 8px;
+            height: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff,
+                        0 0 20px #fff,
+                        0 0 30px #fff,
+                        0 0 40px #f0f0f0;
+            animation: glow 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px #fff,
+                            0 0 20px #fff,
+                            0 0 30px #fff,
+                            0 0 40px #f0f0f0;
+            }
+            to {
+                box-shadow: 0 0 15px #fff,
+                            0 0 25px #fff,
+                            0 0 35px #fff,
+                            0 0 50px #f0f0f0;
+            }
+        }
+        
+        .star-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        /* Polaris at center */
+        #polaris-container {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Sirius position relative to Polaris */
+        #sirius-container {
+            top: calc(50% + 150px);  /* 150px below Polaris */
+            left: calc(50% - 200px); /* 200px to the left */
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Vega - bright summer star */
+        #vega-container {
+            top: calc(50% - 120px);
+            left: calc(50% + 180px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Betelgeuse - red supergiant */
+        #betelgeuse-container {
+            top: calc(50% + 200px);
+            left: calc(50% + 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Rigel - blue supergiant */
+        #rigel-container {
+            top: calc(50% + 220px);
+            left: calc(50% + 80px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Arcturus - orange giant */
+        #arcturus-container {
+            top: calc(50% + 50px);
+            left: calc(50% - 250px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Capella - yellow giant */
+        #capella-container {
+            top: calc(50% - 80px);
+            left: calc(50% - 150px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Altair - white star */
+        #altair-container {
+            top: calc(50% - 50px);
+            left: calc(50% + 280px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Aldebaran - orange giant */
+        #aldebaran-container {
+            top: calc(50% + 180px);
+            left: calc(50% - 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Spica - blue giant */
+        #spica-container {
+            top: calc(50% + 100px);
+            left: calc(50% - 180px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Additional stars to fill space */
+        #deneb-container {
+            top: calc(50% - 180px);
+            left: calc(50% + 120px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #antares-container {
+            top: calc(50% + 250px);
+            left: calc(50% - 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #pollux-container {
+            top: calc(50% - 40px);
+            left: calc(50% - 80px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #castor-container {
+            top: calc(50% - 60px);
+            left: calc(50% - 60px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #regulus-container {
+            top: calc(50% + 80px);
+            left: calc(50% + 150px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #procyon-container {
+            top: calc(50% + 40px);
+            left: calc(50% - 120px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #achernar-container {
+            top: calc(50% + 280px);
+            left: calc(50% + 180px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #canopus-container {
+            top: calc(50% + 300px);
+            left: calc(50% - 250px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alphard-container {
+            top: calc(50% + 130px);
+            left: calc(50% - 30px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #hadar-container {
+            top: calc(50% + 320px);
+            left: calc(50% - 180px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #mira-container {
+            top: calc(50% - 200px);
+            left: calc(50% - 220px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #enif-container {
+            top: calc(50% - 140px);
+            left: calc(50% + 250px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #fomalhaut-container {
+            top: calc(50% + 340px);
+            left: calc(50% + 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #merak-container {
+            top: calc(50% - 80px);
+            left: calc(50% + 60px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alkaid-container {
+            top: calc(50% - 120px);
+            left: calc(50% + 20px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #mizar-container {
+            top: calc(50% - 110px);
+            left: calc(50% + 80px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Outer ring of stars - farther from center */
+        #shaula-container {
+            top: calc(50% + 350px);
+            left: calc(50% - 320px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #kochab-container {
+            top: calc(50% - 280px);
+            left: calc(50% - 150px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #mirach-container {
+            top: calc(50% - 250px);
+            left: calc(50% + 280px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alpheratz-container {
+            top: calc(50% - 320px);
+            left: calc(50% + 200px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #hamal-container {
+            top: calc(50% - 180px);
+            left: calc(50% - 320px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #diphda-container {
+            top: calc(50% + 380px);
+            left: calc(50% + 150px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #nunki-container {
+            top: calc(50% + 220px);
+            left: calc(50% - 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #saiph-container {
+            top: calc(50% + 300px);
+            left: calc(50% + 280px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #mintaka-container {
+            top: calc(50% + 250px);
+            left: calc(50% + 320px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alhena-container {
+            top: calc(50% - 350px);
+            left: calc(50% - 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #gacrux-container {
+            top: calc(50% + 400px);
+            left: calc(50% - 200px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #elnath-container {
+            top: calc(50% - 300px);
+            left: calc(50% - 280px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alioth-container {
+            top: calc(50% - 160px);
+            left: calc(50% + 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #rasalhague-container {
+            top: calc(50% + 50px);
+            left: calc(50% + 380px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #kaus-australis-container {
+            top: calc(50% + 180px);
+            left: calc(50% - 380px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #avior-container {
+            top: calc(50% + 420px);
+            left: calc(50% + 250px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #menkalinan-container {
+            top: calc(50% - 380px);
+            left: calc(50% + 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #atria-container {
+            top: calc(50% + 450px);
+            left: calc(50% - 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alnair-container {
+            top: calc(50% + 380px);
+            left: calc(50% + 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #peacock-container {
+            top: calc(50% + 320px);
+            left: calc(50% - 400px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #mirzam-container {
+            top: calc(50% + 150px);
+            left: calc(50% + 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alphard-container {
+            top: calc(50% - 220px);
+            left: calc(50% - 380px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #polaris-australis-container {
+            top: calc(50% + 480px);
+            left: calc(50% + 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #scheat-container {
+            top: calc(50% - 400px);
+            left: calc(50% + 320px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #markab-container {
+            top: calc(50% - 350px);
+            left: calc(50% + 380px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #menkar-container {
+            top: calc(50% - 280px);
+            left: calc(50% - 400px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #sabik-container {
+            top: calc(50% + 100px);
+            left: calc(50% - 420px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #schedar-container {
+            top: calc(50% - 450px);
+            left: calc(50% - 200px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #caph-container {
+            top: calc(50% - 420px);
+            left: calc(50% - 280px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #etamin-container {
+            top: calc(50% - 150px);
+            left: calc(50% + 420px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Far outer ring of stars - even farther from center */
+        #acrux-container {
+            top: calc(50% + 500px);
+            left: calc(50% - 300px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #adhara-container {
+            top: calc(50% + 450px);
+            left: calc(50% - 450px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #castor-b-container {
+            top: calc(50% - 500px);
+            left: calc(50% + 150px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #shaula-b-container {
+            top: calc(50% + 550px);
+            left: calc(50% + 200px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #miaplacidus-container {
+            top: calc(50% + 480px);
+            left: calc(50% + 400px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #eltanin-container {
+            top: calc(50% - 450px);
+            left: calc(50% + 450px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #sadr-container {
+            top: calc(50% - 550px);
+            left: calc(50% - 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #naos-container {
+            top: calc(50% + 600px);
+            left: calc(50% - 150px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #almach-container {
+            top: calc(50% - 480px);
+            left: calc(50% - 400px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #caph-b-container {
+            top: calc(50% - 600px);
+            left: calc(50% + 250px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #izar-container {
+            top: calc(50% + 150px);
+            left: calc(50% - 500px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #murzim-container {
+            top: calc(50% + 350px);
+            left: calc(50% + 450px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alphard-b-container {
+            top: calc(50% - 350px);
+            left: calc(50% - 500px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #gienah-container {
+            top: calc(50% + 250px);
+            left: calc(50% - 480px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #zeta-puppis-container {
+            top: calc(50% + 580px);
+            left: calc(50% + 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alsephina-container {
+            top: calc(50% - 520px);
+            left: calc(50% + 380px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #delta-velorum-container {
+            top: calc(50% + 650px);
+            left: calc(50% - 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #aspidiske-container {
+            top: calc(50% + 520px);
+            left: calc(50% - 520px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #suhail-container {
+            top: calc(50% + 680px);
+            left: calc(50% + 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alphecca-container {
+            top: calc(50% - 250px);
+            left: calc(50% + 500px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #vindemiatrix-container {
+            top: calc(50% + 50px);
+            left: calc(50% + 550px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #phecda-container {
+            top: calc(50% - 650px);
+            left: calc(50% - 200px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #megrez-container {
+            top: calc(50% - 580px);
+            left: calc(50% - 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #gienah-corvi-container {
+            top: calc(50% + 400px);
+            left: calc(50% - 600px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #kraz-container {
+            top: calc(50% + 300px);
+            left: calc(50% - 550px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #algorab-container {
+            top: calc(50% + 350px);
+            left: calc(50% - 650px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #markeb-container {
+            top: calc(50% + 700px);
+            left: calc(50% - 250px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #sargas-container {
+            top: calc(50% + 600px);
+            left: calc(50% - 400px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #avior-b-container {
+            top: calc(50% + 750px);
+            left: calc(50% + 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #muscida-container {
+            top: calc(50% - 700px);
+            left: calc(50% + 100px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alderamin-container {
+            top: calc(50% - 550px);
+            left: calc(50% + 550px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alfirk-container {
+            top: calc(50% - 750px);
+            left: calc(50% - 50px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #ankaa-container {
+            top: calc(50% + 650px);
+            left: calc(50% + 450px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #girtab-container {
+            top: calc(50% + 500px);
+            left: calc(50% - 650px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #zubenelgenubi-container {
+            top: calc(50% + 200px);
+            left: calc(50% + 600px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #zubeneschamali-container {
+            top: calc(50% + 100px);
+            left: calc(50% + 650px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #unukalhai-container {
+            top: calc(50% - 100px);
+            left: calc(50% - 600px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #sheratan-container {
+            top: calc(50% - 300px);
+            left: calc(50% - 650px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #ruchbah-container {
+            top: calc(50% - 680px);
+            left: calc(50% + 350px);
+            transform: translate(-50%, -50%);
+        }
+        
+        #alfirk-b-container {
+            top: calc(50% - 800px);
+            left: calc(50% + 200px);
+            transform: translate(-50%, -50%);
+        }
+        
+        .star-label {
+            position: absolute;
+            top: -25px;
+            color: #fff;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        
+        /* Rigel label below the star to avoid collision */
+        #rigel-container .star-label {
+            top: auto;
+            bottom: -25px;
+        }
+        
+        /* Fix label collisions for closely grouped stars */
+        #pollux-container .star-label {
+            top: auto;
+            bottom: -25px;
+        }
+        
+        #merak-container .star-label {
+            top: auto;
+            bottom: -25px;
+        }
+        
+        /* Sirius is brighter */
+        #sirius {
+            width: 10px;
+            height: 10px;
+            animation: glow-bright 3s ease-in-out infinite alternate;
+        }
+        
+        /* Vega - very bright white */
+        #vega {
+            width: 9px;
+            height: 9px;
+            animation: glow-bright 3.5s ease-in-out infinite alternate;
+        }
+        
+        /* Betelgeuse - red supergiant */
+        #betelgeuse {
+            width: 11px;
+            height: 11px;
+            background-color: #ffcccc;
+            animation: glow-red 4.5s ease-in-out infinite alternate;
+        }
+        
+        /* Rigel - blue supergiant */
+        #rigel {
+            width: 9px;
+            height: 9px;
+            background-color: #e0e0ff;
+            animation: glow-blue 3s ease-in-out infinite alternate;
+        }
+        
+        /* Arcturus - orange giant */
+        #arcturus {
+            width: 9px;
+            height: 9px;
+            background-color: #ffe0cc;
+            animation: glow-orange 4s ease-in-out infinite alternate;
+        }
+        
+        /* Capella - yellow */
+        #capella {
+            width: 8px;
+            height: 8px;
+            background-color: #ffffcc;
+            animation: glow-yellow 3.8s ease-in-out infinite alternate;
+        }
+        
+        /* Altair - white */
+        #altair {
+            width: 8px;
+            height: 8px;
+            animation: glow 3.2s ease-in-out infinite alternate;
+        }
+        
+        /* Aldebaran - orange giant */
+        #aldebaran {
+            width: 9px;
+            height: 9px;
+            background-color: #ffddcc;
+            animation: glow-orange 4.2s ease-in-out infinite alternate;
+        }
+        
+        /* Spica - blue */
+        #spica {
+            width: 8px;
+            height: 8px;
+            background-color: #ccccff;
+            animation: glow-blue 3.6s ease-in-out infinite alternate;
+        }
+        
+        /* Additional star styles */
+        #deneb {
+            width: 9px;
+            height: 9px;
+            animation: glow-bright 3.8s ease-in-out infinite alternate;
+        }
+        
+        #antares {
+            width: 10px;
+            height: 10px;
+            background-color: #ff9999;
+            animation: glow-red 5s ease-in-out infinite alternate;
+        }
+        
+        #pollux, #castor {
+            width: 7px;
+            height: 7px;
+            background-color: #ffffdd;
+            animation: glow-yellow 3.5s ease-in-out infinite alternate;
+        }
+        
+        #regulus {
+            width: 8px;
+            height: 8px;
+            background-color: #ddddff;
+            animation: glow-blue 3.3s ease-in-out infinite alternate;
+        }
+        
+        #procyon {
+            width: 8px;
+            height: 8px;
+            background-color: #fffff0;
+            animation: glow 3.4s ease-in-out infinite alternate;
+        }
+        
+        #achernar, #canopus {
+            width: 9px;
+            height: 9px;
+            animation: glow-bright 3.7s ease-in-out infinite alternate;
+        }
+        
+        #alphard {
+            width: 7px;
+            height: 7px;
+            background-color: #ffd0b0;
+            animation: glow-orange 4.1s ease-in-out infinite alternate;
+        }
+        
+        #hadar {
+            width: 8px;
+            height: 8px;
+            background-color: #ccddff;
+            animation: glow-blue 3.4s ease-in-out infinite alternate;
+        }
+        
+        #mira {
+            width: 8px;
+            height: 8px;
+            background-color: #ffcccc;
+            animation: glow-red 6s ease-in-out infinite alternate;
+        }
+        
+        #enif {
+            width: 7px;
+            height: 7px;
+            background-color: #ffc0a0;
+            animation: glow-orange 3.9s ease-in-out infinite alternate;
+        }
+        
+        #fomalhaut {
+            width: 8px;
+            height: 8px;
+            animation: glow 3.6s ease-in-out infinite alternate;
+        }
+        
+        #merak, #alkaid, #mizar {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.5s ease-in-out infinite alternate;
+        }
+        
+        /* New outer stars */
+        #shaula, #nunki, #kaus-australis {
+            width: 7px;
+            height: 7px;
+            background-color: #d0d0ff;
+            animation: glow-blue 3.7s ease-in-out infinite alternate;
+        }
+        
+        #kochab {
+            width: 7px;
+            height: 7px;
+            background-color: #ffd0a0;
+            animation: glow-orange 4s ease-in-out infinite alternate;
+        }
+        
+        #mirach, #alpheratz, #hamal {
+            width: 7px;
+            height: 7px;
+            background-color: #ffdddd;
+            animation: glow 3.6s ease-in-out infinite alternate;
+        }
+        
+        #diphda, #menkar {
+            width: 8px;
+            height: 8px;
+            background-color: #ffc0a0;
+            animation: glow-orange 4.2s ease-in-out infinite alternate;
+        }
+        
+        #saiph, #mintaka {
+            width: 7px;
+            height: 7px;
+            background-color: #e0e0ff;
+            animation: glow-blue 3.3s ease-in-out infinite alternate;
+        }
+        
+        #alhena, #elnath {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.8s ease-in-out infinite alternate;
+        }
+        
+        #gacrux {
+            width: 7px;
+            height: 7px;
+            background-color: #ff9999;
+            animation: glow-red 4.5s ease-in-out infinite alternate;
+        }
+        
+        #alioth, #menkalinan {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.5s ease-in-out infinite alternate;
+        }
+        
+        #rasalhague {
+            width: 7px;
+            height: 7px;
+            background-color: #f0f0f0;
+            animation: glow 3.7s ease-in-out infinite alternate;
+        }
+        
+        #avior {
+            width: 8px;
+            height: 8px;
+            background-color: #ffd0b0;
+            animation: glow-orange 3.9s ease-in-out infinite alternate;
+        }
+        
+        #atria {
+            width: 8px;
+            height: 8px;
+            background-color: #ffc0c0;
+            animation: glow-orange 4.1s ease-in-out infinite alternate;
+        }
+        
+        #alnair, #peacock {
+            width: 7px;
+            height: 7px;
+            background-color: #e8e8ff;
+            animation: glow-blue 3.6s ease-in-out infinite alternate;
+        }
+        
+        #mirzam {
+            width: 6px;
+            height: 6px;
+            background-color: #d0d0ff;
+            animation: glow-blue 3.4s ease-in-out infinite alternate;
+        }
+        
+        #alphard {
+            width: 7px;
+            height: 7px;
+            background-color: #ffd0c0;
+            animation: glow-orange 4.3s ease-in-out infinite alternate;
+        }
+        
+        #polaris-australis {
+            width: 6px;
+            height: 6px;
+            animation: glow 4s ease-in-out infinite alternate;
+        }
+        
+        #scheat, #markab {
+            width: 7px;
+            height: 7px;
+            background-color: #ffe0e0;
+            animation: glow 3.7s ease-in-out infinite alternate;
+        }
+        
+        #sabik {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.8s ease-in-out infinite alternate;
+        }
+        
+        #schedar, #caph {
+            width: 7px;
+            height: 7px;
+            background-color: #ffd0a0;
+            animation: glow-orange 3.9s ease-in-out infinite alternate;
+        }
+        
+        #etamin {
+            width: 7px;
+            height: 7px;
+            background-color: #ffc090;
+            animation: glow-orange 4.2s ease-in-out infinite alternate;
+        }
+        
+        /* Far outer stars */
+        #acrux, #gacrux {
+            width: 8px;
+            height: 8px;
+            background-color: #e0e0ff;
+            animation: glow-blue 3.5s ease-in-out infinite alternate;
+        }
+        
+        #adhara {
+            width: 8px;
+            height: 8px;
+            background-color: #f0f0ff;
+            animation: glow-bright 3.3s ease-in-out infinite alternate;
+        }
+        
+        #castor-b, #shaula-b {
+            width: 6px;
+            height: 6px;
+            animation: glow 3.8s ease-in-out infinite alternate;
+        }
+        
+        #miaplacidus {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.6s ease-in-out infinite alternate;
+        }
+        
+        #eltanin, #sadr {
+            width: 7px;
+            height: 7px;
+            background-color: #ffd0a0;
+            animation: glow-orange 4.1s ease-in-out infinite alternate;
+        }
+        
+        #naos {
+            width: 7px;
+            height: 7px;
+            background-color: #c0c0ff;
+            animation: glow-blue 3.2s ease-in-out infinite alternate;
+        }
+        
+        #almach {
+            width: 7px;
+            height: 7px;
+            background-color: #ffc0b0;
+            animation: glow-orange 3.9s ease-in-out infinite alternate;
+        }
+        
+        #caph-b, #izar {
+            width: 6px;
+            height: 6px;
+            background-color: #ffe0cc;
+            animation: glow 3.7s ease-in-out infinite alternate;
+        }
+        
+        #murzim, #alphard-b {
+            width: 6px;
+            height: 6px;
+            background-color: #e0e0ff;
+            animation: glow-blue 3.5s ease-in-out infinite alternate;
+        }
+        
+        #gienah, #gienah-corvi {
+            width: 6px;
+            height: 6px;
+            background-color: #f0f0f0;
+            animation: glow 3.8s ease-in-out infinite alternate;
+        }
+        
+        #zeta-puppis {
+            width: 7px;
+            height: 7px;
+            background-color: #b0b0ff;
+            animation: glow-blue 3.1s ease-in-out infinite alternate;
+        }
+        
+        #alsephina, #delta-velorum {
+            width: 6px;
+            height: 6px;
+            animation: glow 3.9s ease-in-out infinite alternate;
+        }
+        
+        #aspidiske, #suhail {
+            width: 7px;
+            height: 7px;
+            background-color: #ffd0c0;
+            animation: glow-orange 4s ease-in-out infinite alternate;
+        }
+        
+        #alphecca {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.6s ease-in-out infinite alternate;
+        }
+        
+        #vindemiatrix {
+            width: 6px;
+            height: 6px;
+            background-color: #ffffe0;
+            animation: glow-yellow 3.8s ease-in-out infinite alternate;
+        }
+        
+        #phecda, #megrez {
+            width: 6px;
+            height: 6px;
+            animation: glow 3.7s ease-in-out infinite alternate;
+        }
+        
+        #kraz, #algorab {
+            width: 6px;
+            height: 6px;
+            background-color: #f0f0f0;
+            animation: glow 3.9s ease-in-out infinite alternate;
+        }
+        
+        #markeb, #sargas {
+            width: 6px;
+            height: 6px;
+            background-color: #d0d0ff;
+            animation: glow-blue 3.6s ease-in-out infinite alternate;
+        }
+        
+        #avior-b, #muscida {
+            width: 6px;
+            height: 6px;
+            animation: glow 4s ease-in-out infinite alternate;
+        }
+        
+        #alderamin {
+            width: 7px;
+            height: 7px;
+            animation: glow 3.5s ease-in-out infinite alternate;
+        }
+        
+        #alfirk, #alfirk-b {
+            width: 6px;
+            height: 6px;
+            background-color: #e0e0ff;
+            animation: glow-blue 3.7s ease-in-out infinite alternate;
+        }
+        
+        #ankaa {
+            width: 7px;
+            height: 7px;
+            background-color: #ffc0a0;
+            animation: glow-orange 3.8s ease-in-out infinite alternate;
+        }
+        
+        #girtab {
+            width: 6px;
+            height: 6px;
+            background-color: #ffd0d0;
+            animation: glow 3.6s ease-in-out infinite alternate;
+        }
+        
+        #zubenelgenubi, #zubeneschamali {
+            width: 6px;
+            height: 6px;
+            background-color: #e0f0ff;
+            animation: glow-blue 3.7s ease-in-out infinite alternate;
+        }
+        
+        #unukalhai {
+            width: 6px;
+            height: 6px;
+            background-color: #ffc0c0;
+            animation: glow-orange 4.1s ease-in-out infinite alternate;
+        }
+        
+        #sheratan {
+            width: 6px;
+            height: 6px;
+            animation: glow 3.8s ease-in-out infinite alternate;
+        }
+        
+        #ruchbah {
+            width: 6px;
+            height: 6px;
+            background-color: #f0f0f0;
+            animation: glow 3.9s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-bright {
+            from {
+                box-shadow: 0 0 15px #fff,
+                            0 0 25px #fff,
+                            0 0 35px #fff,
+                            0 0 45px #e0e0ff;
+            }
+            to {
+                box-shadow: 0 0 20px #fff,
+                            0 0 30px #fff,
+                            0 0 40px #fff,
+                            0 0 60px #e0e0ff;
+            }
+        }
+        
+        @keyframes glow-red {
+            from {
+                box-shadow: 0 0 15px #ffcccc,
+                            0 0 25px #ffaaaa,
+                            0 0 35px #ff8888,
+                            0 0 45px #ff6666;
+            }
+            to {
+                box-shadow: 0 0 20px #ffcccc,
+                            0 0 30px #ffaaaa,
+                            0 0 40px #ff8888,
+                            0 0 55px #ff6666;
+            }
+        }
+        
+        @keyframes glow-blue {
+            from {
+                box-shadow: 0 0 10px #ccccff,
+                            0 0 20px #aaaaff,
+                            0 0 30px #8888ff,
+                            0 0 40px #6666ff;
+            }
+            to {
+                box-shadow: 0 0 15px #ccccff,
+                            0 0 25px #aaaaff,
+                            0 0 35px #8888ff,
+                            0 0 50px #6666ff;
+            }
+        }
+        
+        @keyframes glow-orange {
+            from {
+                box-shadow: 0 0 10px #ffe0cc,
+                            0 0 20px #ffccaa,
+                            0 0 30px #ffaa88,
+                            0 0 40px #ff9966;
+            }
+            to {
+                box-shadow: 0 0 15px #ffe0cc,
+                            0 0 25px #ffccaa,
+                            0 0 35px #ffaa88,
+                            0 0 50px #ff9966;
+            }
+        }
+        
+        @keyframes glow-yellow {
+            from {
+                box-shadow: 0 0 10px #ffffcc,
+                            0 0 20px #ffffaa,
+                            0 0 30px #ffff88,
+                            0 0 40px #ffff66;
+            }
+            to {
+                box-shadow: 0 0 15px #ffffcc,
+                            0 0 25px #ffffaa,
+                            0 0 35px #ffff88,
+                            0 0 50px #ffff66;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sky">
+        <div class="star-container" id="polaris-container">
+            <span class="star-label">Polaris</span>
+            <div class="star" id="polaris"></div>
+        </div>
+        
+        <div class="star-container" id="sirius-container">
+            <span class="star-label">Sirius</span>
+            <div class="star" id="sirius"></div>
+        </div>
+        
+        <div class="star-container" id="vega-container">
+            <span class="star-label">Vega</span>
+            <div class="star" id="vega"></div>
+        </div>
+        
+        <div class="star-container" id="betelgeuse-container">
+            <span class="star-label">Betelgeuse</span>
+            <div class="star" id="betelgeuse"></div>
+        </div>
+        
+        <div class="star-container" id="rigel-container">
+            <span class="star-label">Rigel</span>
+            <div class="star" id="rigel"></div>
+        </div>
+        
+        <div class="star-container" id="arcturus-container">
+            <span class="star-label">Arcturus</span>
+            <div class="star" id="arcturus"></div>
+        </div>
+        
+        <div class="star-container" id="capella-container">
+            <span class="star-label">Capella</span>
+            <div class="star" id="capella"></div>
+        </div>
+        
+        <div class="star-container" id="altair-container">
+            <span class="star-label">Altair</span>
+            <div class="star" id="altair"></div>
+        </div>
+        
+        <div class="star-container" id="aldebaran-container">
+            <span class="star-label">Aldebaran</span>
+            <div class="star" id="aldebaran"></div>
+        </div>
+        
+        <div class="star-container" id="spica-container">
+            <span class="star-label">Spica</span>
+            <div class="star" id="spica"></div>
+        </div>
+        
+        <div class="star-container" id="deneb-container">
+            <span class="star-label">Deneb</span>
+            <div class="star" id="deneb"></div>
+        </div>
+        
+        <div class="star-container" id="antares-container">
+            <span class="star-label">Antares</span>
+            <div class="star" id="antares"></div>
+        </div>
+        
+        <div class="star-container" id="pollux-container">
+            <span class="star-label">Pollux</span>
+            <div class="star" id="pollux"></div>
+        </div>
+        
+        <div class="star-container" id="castor-container">
+            <span class="star-label">Castor</span>
+            <div class="star" id="castor"></div>
+        </div>
+        
+        <div class="star-container" id="regulus-container">
+            <span class="star-label">Regulus</span>
+            <div class="star" id="regulus"></div>
+        </div>
+        
+        <div class="star-container" id="procyon-container">
+            <span class="star-label">Procyon</span>
+            <div class="star" id="procyon"></div>
+        </div>
+        
+        <div class="star-container" id="achernar-container">
+            <span class="star-label">Achernar</span>
+            <div class="star" id="achernar"></div>
+        </div>
+        
+        <div class="star-container" id="canopus-container">
+            <span class="star-label">Canopus</span>
+            <div class="star" id="canopus"></div>
+        </div>
+        
+        <div class="star-container" id="alphard-container">
+            <span class="star-label">Alphard</span>
+            <div class="star" id="alphard"></div>
+        </div>
+        
+        <div class="star-container" id="hadar-container">
+            <span class="star-label">Hadar</span>
+            <div class="star" id="hadar"></div>
+        </div>
+        
+        <div class="star-container" id="mira-container">
+            <span class="star-label">Mira</span>
+            <div class="star" id="mira"></div>
+        </div>
+        
+        <div class="star-container" id="enif-container">
+            <span class="star-label">Enif</span>
+            <div class="star" id="enif"></div>
+        </div>
+        
+        <div class="star-container" id="fomalhaut-container">
+            <span class="star-label">Fomalhaut</span>
+            <div class="star" id="fomalhaut"></div>
+        </div>
+        
+        <div class="star-container" id="merak-container">
+            <span class="star-label">Merak</span>
+            <div class="star" id="merak"></div>
+        </div>
+        
+        <div class="star-container" id="alkaid-container">
+            <span class="star-label">Alkaid</span>
+            <div class="star" id="alkaid"></div>
+        </div>
+        
+        <div class="star-container" id="mizar-container">
+            <span class="star-label">Mizar</span>
+            <div class="star" id="mizar"></div>
+        </div>
+        
+        <div class="star-container" id="shaula-container">
+            <span class="star-label">Shaula</span>
+            <div class="star" id="shaula"></div>
+        </div>
+        
+        <div class="star-container" id="kochab-container">
+            <span class="star-label">Kochab</span>
+            <div class="star" id="kochab"></div>
+        </div>
+        
+        <div class="star-container" id="mirach-container">
+            <span class="star-label">Mirach</span>
+            <div class="star" id="mirach"></div>
+        </div>
+        
+        <div class="star-container" id="alpheratz-container">
+            <span class="star-label">Alpheratz</span>
+            <div class="star" id="alpheratz"></div>
+        </div>
+        
+        <div class="star-container" id="hamal-container">
+            <span class="star-label">Hamal</span>
+            <div class="star" id="hamal"></div>
+        </div>
+        
+        <div class="star-container" id="diphda-container">
+            <span class="star-label">Diphda</span>
+            <div class="star" id="diphda"></div>
+        </div>
+        
+        <div class="star-container" id="nunki-container">
+            <span class="star-label">Nunki</span>
+            <div class="star" id="nunki"></div>
+        </div>
+        
+        <div class="star-container" id="saiph-container">
+            <span class="star-label">Saiph</span>
+            <div class="star" id="saiph"></div>
+        </div>
+        
+        <div class="star-container" id="mintaka-container">
+            <span class="star-label">Mintaka</span>
+            <div class="star" id="mintaka"></div>
+        </div>
+        
+        <div class="star-container" id="alhena-container">
+            <span class="star-label">Alhena</span>
+            <div class="star" id="alhena"></div>
+        </div>
+        
+        <div class="star-container" id="gacrux-container">
+            <span class="star-label">Gacrux</span>
+            <div class="star" id="gacrux"></div>
+        </div>
+        
+        <div class="star-container" id="elnath-container">
+            <span class="star-label">Elnath</span>
+            <div class="star" id="elnath"></div>
+        </div>
+        
+        <div class="star-container" id="alioth-container">
+            <span class="star-label">Alioth</span>
+            <div class="star" id="alioth"></div>
+        </div>
+        
+        <div class="star-container" id="rasalhague-container">
+            <span class="star-label">Rasalhague</span>
+            <div class="star" id="rasalhague"></div>
+        </div>
+        
+        <div class="star-container" id="kaus-australis-container">
+            <span class="star-label">Kaus Australis</span>
+            <div class="star" id="kaus-australis"></div>
+        </div>
+        
+        <div class="star-container" id="avior-container">
+            <span class="star-label">Avior</span>
+            <div class="star" id="avior"></div>
+        </div>
+        
+        <div class="star-container" id="menkalinan-container">
+            <span class="star-label">Menkalinan</span>
+            <div class="star" id="menkalinan"></div>
+        </div>
+        
+        <div class="star-container" id="atria-container">
+            <span class="star-label">Atria</span>
+            <div class="star" id="atria"></div>
+        </div>
+        
+        <div class="star-container" id="alnair-container">
+            <span class="star-label">Alnair</span>
+            <div class="star" id="alnair"></div>
+        </div>
+        
+        <div class="star-container" id="peacock-container">
+            <span class="star-label">Peacock</span>
+            <div class="star" id="peacock"></div>
+        </div>
+        
+        <div class="star-container" id="mirzam-container">
+            <span class="star-label">Mirzam</span>
+            <div class="star" id="mirzam"></div>
+        </div>
+        
+        <div class="star-container" id="alphard-container">
+            <span class="star-label">Alphard</span>
+            <div class="star" id="alphard"></div>
+        </div>
+        
+        <div class="star-container" id="polaris-australis-container">
+            <span class="star-label">Polaris Australis</span>
+            <div class="star" id="polaris-australis"></div>
+        </div>
+        
+        <div class="star-container" id="scheat-container">
+            <span class="star-label">Scheat</span>
+            <div class="star" id="scheat"></div>
+        </div>
+        
+        <div class="star-container" id="markab-container">
+            <span class="star-label">Markab</span>
+            <div class="star" id="markab"></div>
+        </div>
+        
+        <div class="star-container" id="menkar-container">
+            <span class="star-label">Menkar</span>
+            <div class="star" id="menkar"></div>
+        </div>
+        
+        <div class="star-container" id="sabik-container">
+            <span class="star-label">Sabik</span>
+            <div class="star" id="sabik"></div>
+        </div>
+        
+        <div class="star-container" id="schedar-container">
+            <span class="star-label">Schedar</span>
+            <div class="star" id="schedar"></div>
+        </div>
+        
+        <div class="star-container" id="caph-container">
+            <span class="star-label">Caph</span>
+            <div class="star" id="caph"></div>
+        </div>
+        
+        <div class="star-container" id="etamin-container">
+            <span class="star-label">Etamin</span>
+            <div class="star" id="etamin"></div>
+        </div>
+        
+        <div class="star-container" id="acrux-container">
+            <span class="star-label">Acrux</span>
+            <div class="star" id="acrux"></div>
+        </div>
+        
+        <div class="star-container" id="adhara-container">
+            <span class="star-label">Adhara</span>
+            <div class="star" id="adhara"></div>
+        </div>
+        
+        <div class="star-container" id="castor-b-container">
+            <span class="star-label">γ Gem</span>
+            <div class="star" id="castor-b"></div>
+        </div>
+        
+        <div class="star-container" id="shaula-b-container">
+            <span class="star-label">λ Sco B</span>
+            <div class="star" id="shaula-b"></div>
+        </div>
+        
+        <div class="star-container" id="miaplacidus-container">
+            <span class="star-label">Miaplacidus</span>
+            <div class="star" id="miaplacidus"></div>
+        </div>
+        
+        <div class="star-container" id="eltanin-container">
+            <span class="star-label">Eltanin</span>
+            <div class="star" id="eltanin"></div>
+        </div>
+        
+        <div class="star-container" id="sadr-container">
+            <span class="star-label">Sadr</span>
+            <div class="star" id="sadr"></div>
+        </div>
+        
+        <div class="star-container" id="naos-container">
+            <span class="star-label">Naos</span>
+            <div class="star" id="naos"></div>
+        </div>
+        
+        <div class="star-container" id="almach-container">
+            <span class="star-label">Almach</span>
+            <div class="star" id="almach"></div>
+        </div>
+        
+        <div class="star-container" id="caph-b-container">
+            <span class="star-label">δ Cas</span>
+            <div class="star" id="caph-b"></div>
+        </div>
+        
+        <div class="star-container" id="izar-container">
+            <span class="star-label">Izar</span>
+            <div class="star" id="izar"></div>
+        </div>
+        
+        <div class="star-container" id="murzim-container">
+            <span class="star-label">Murzim</span>
+            <div class="star" id="murzim"></div>
+        </div>
+        
+        <div class="star-container" id="alphard-b-container">
+            <span class="star-label">σ Hya</span>
+            <div class="star" id="alphard-b"></div>
+        </div>
+        
+        <div class="star-container" id="gienah-container">
+            <span class="star-label">Gienah</span>
+            <div class="star" id="gienah"></div>
+        </div>
+        
+        <div class="star-container" id="zeta-puppis-container">
+            <span class="star-label">Naos</span>
+            <div class="star" id="zeta-puppis"></div>
+        </div>
+        
+        <div class="star-container" id="alsephina-container">
+            <span class="star-label">Alsephina</span>
+            <div class="star" id="alsephina"></div>
+        </div>
+        
+        <div class="star-container" id="delta-velorum-container">
+            <span class="star-label">δ Vel</span>
+            <div class="star" id="delta-velorum"></div>
+        </div>
+        
+        <div class="star-container" id="aspidiske-container">
+            <span class="star-label">Aspidiske</span>
+            <div class="star" id="aspidiske"></div>
+        </div>
+        
+        <div class="star-container" id="suhail-container">
+            <span class="star-label">Suhail</span>
+            <div class="star" id="suhail"></div>
+        </div>
+        
+        <div class="star-container" id="alphecca-container">
+            <span class="star-label">Alphecca</span>
+            <div class="star" id="alphecca"></div>
+        </div>
+        
+        <div class="star-container" id="vindemiatrix-container">
+            <span class="star-label">Vindemiatrix</span>
+            <div class="star" id="vindemiatrix"></div>
+        </div>
+        
+        <div class="star-container" id="phecda-container">
+            <span class="star-label">Phecda</span>
+            <div class="star" id="phecda"></div>
+        </div>
+        
+        <div class="star-container" id="megrez-container">
+            <span class="star-label">Megrez</span>
+            <div class="star" id="megrez"></div>
+        </div>
+        
+        <div class="star-container" id="gienah-corvi-container">
+            <span class="star-label">Gienah Corvi</span>
+            <div class="star" id="gienah-corvi"></div>
+        </div>
+        
+        <div class="star-container" id="kraz-container">
+            <span class="star-label">Kraz</span>
+            <div class="star" id="kraz"></div>
+        </div>
+        
+        <div class="star-container" id="algorab-container">
+            <span class="star-label">Algorab</span>
+            <div class="star" id="algorab"></div>
+        </div>
+        
+        <div class="star-container" id="markeb-container">
+            <span class="star-label">Markeb</span>
+            <div class="star" id="markeb"></div>
+        </div>
+        
+        <div class="star-container" id="sargas-container">
+            <span class="star-label">Sargas</span>
+            <div class="star" id="sargas"></div>
+        </div>
+        
+        <div class="star-container" id="avior-b-container">
+            <span class="star-label">ε Car B</span>
+            <div class="star" id="avior-b"></div>
+        </div>
+        
+        <div class="star-container" id="muscida-container">
+            <span class="star-label">Muscida</span>
+            <div class="star" id="muscida"></div>
+        </div>
+        
+        <div class="star-container" id="alderamin-container">
+            <span class="star-label">Alderamin</span>
+            <div class="star" id="alderamin"></div>
+        </div>
+        
+        <div class="star-container" id="alfirk-container">
+            <span class="star-label">Alfirk</span>
+            <div class="star" id="alfirk"></div>
+        </div>
+        
+        <div class="star-container" id="ankaa-container">
+            <span class="star-label">Ankaa</span>
+            <div class="star" id="ankaa"></div>
+        </div>
+        
+        <div class="star-container" id="girtab-container">
+            <span class="star-label">Girtab</span>
+            <div class="star" id="girtab"></div>
+        </div>
+        
+        <div class="star-container" id="zubenelgenubi-container">
+            <span class="star-label">Zubenelgenubi</span>
+            <div class="star" id="zubenelgenubi"></div>
+        </div>
+        
+        <div class="star-container" id="zubeneschamali-container">
+            <span class="star-label">Zubeneschamali</span>
+            <div class="star" id="zubeneschamali"></div>
+        </div>
+        
+        <div class="star-container" id="unukalhai-container">
+            <span class="star-label">Unukalhai</span>
+            <div class="star" id="unukalhai"></div>
+        </div>
+        
+        <div class="star-container" id="sheratan-container">
+            <span class="star-label">Sheratan</span>
+            <div class="star" id="sheratan"></div>
+        </div>
+        
+        <div class="star-container" id="ruchbah-container">
+            <span class="star-label">Ruchbah</span>
+            <div class="star" id="ruchbah"></div>
+        </div>
+        
+        <div class="star-container" id="alfirk-b-container">
+            <span class="star-label">ε Cep</span>
+            <div class="star" id="alfirk-b"></div>
+        </div>
+    </div>
+    
+    <script>
+        console.log("Stars are shining");
+        
+        // Handle multiple stars
+        const stars = document.querySelectorAll('.star-container');
+        const threshold = 100; // pixels
+        
+        document.addEventListener('mousemove', (e) => {
+            stars.forEach(container => {
+                const label = container.querySelector('.star-label');
+                const rect = container.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const distance = Math.sqrt(
+                    Math.pow(e.clientX - centerX, 2) + 
+                    Math.pow(e.clientY - centerY, 2)
+                );
+                
+                if (distance < threshold) {
+                    const opacity = 1 - (distance / threshold);
+                    label.style.opacity = opacity;
+                } else {
+                    label.style.opacity = 0;
+                }
+            });
+        });
+        
+        // Optional: Function to move Polaris (and all stars will move with it)
+        function movePolaris(x, y) {
+            const sky = document.querySelector('.sky');
+            const polarisContainer = document.getElementById('polaris-container');
+            
+            // Update Polaris position
+            polarisContainer.style.left = x + '%';
+            polarisContainer.style.top = y + '%';
+        }
+        
+        // Example: movePolaris(30, 40); // Moves Polaris to 30% from left, 40% from top
+    </script>
+</body>
+</html>
