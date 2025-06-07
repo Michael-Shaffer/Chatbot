@@ -1,0 +1,295 @@
+/* --- 1. Foundational & Atmospheric Styling --- */
+:root {
+    --polaris-blue: #00bfff;
+    --dark-navy: #0a192f;
+    --light-navy: #112240;
+    --lightest-navy: #233554;
+    --text-primary: #ccd6f6;
+    --text-secondary: #8892b0;
+    --user-bubble-bg: #005A8C;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: #000;
+    color: var(--text-primary);
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, rgba(20, 30, 70, 0.3), rgba(0, 0, 0, 0) 60%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* --- Remember to paste your starfield CSS from your original file here --- */
+/* ... */
+
+/* --- 2. Full-Bleed Chat Layout --- */
+.page-wrapper {
+    height: 100vh;
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: rgba(10, 25, 47, 0.6);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid rgba(0, 191, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    transition: margin-left 0.3s ease;
+}
+
+.chat-interface {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2);
+    width: 0;
+}
+
+/* --- 3. Sidebar Styling --- */
+.sidebar-header {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 191, 255, 0.2);
+    margin-bottom: 1.5rem;
+}
+.sidebar-header .home-link {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: none;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+    transition: color 0.3s;
+}
+.sidebar-header .home-link:hover {
+    color: var(--polaris-blue);
+}
+.sidebar-header h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--polaris-blue);
+    margin: 1rem 0 0;
+}
+.document-list .document-item {
+    display: block;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background-color 0.3s, color 0.3s;
+    border: 1px solid transparent;
+    text-align: center;
+}
+.document-list .document-item:hover {
+    background-color: rgba(0, 191, 255, 0.1);
+    color: var(--text-primary);
+}
+.document-list .document-item.active {
+    background-color: var(--light-navy);
+    color: #ffffff;
+    font-weight: 600;
+    border-color: rgba(0, 191, 255, 0.3);
+}
+
+/* --- 4. Asymmetrical Message Styling --- */
+.message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.message p {
+    margin: 0;
+    line-height: 1.6;
+    max-width: 70ch;
+    overflow-wrap: break-word;
+}
+.message-content {
+    position: relative;
+}
+.bot-message {
+    align-self: flex-start;
+}
+.bot-message .message-content {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+.bot-message p {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+.bot-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--dark-navy);
+    border: 1px solid var(--polaris-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.user-message {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+.user-message .message-content {
+    background: var(--user-bubble-bg);
+    color: #fff;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    border-top-right-radius: 4px;
+}
+
+/* --- 5. Centered Chat Column --- */
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: flex-end;
+    padding: 1rem 0;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+.chat-input-form {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    display: flex;
+    padding: 1.5rem 0;
+    box-sizing: border-box; /* Ensures padding is included in the width/height */
+}
+#message-input-wrapper {
+    flex-grow: 1;
+}
+
+/* --- 6. Contextual Message Actions --- */
+.message-actions {
+    position: absolute;
+    top: -10px;
+    display: flex;
+    gap: 5px;
+    background: var(--lightest-navy);
+    padding: 4px 8px;
+    border-radius: 16px;
+    border: 1px solid #303C55;
+    opacity: 0;
+    transform: translateY(5px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.user-message:hover .message-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.user-message .message-actions {
+    right: auto;
+    left: -15px;
+}
+.bot-message .message-actions {
+    display: none;
+}
+.action-button {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+.action-button:hover {
+    color: var(--polaris-blue);
+}
+.action-button svg {
+    width: 16px;
+    height: 16px;
+}
+.copy-feedback {
+    color: var(--polaris-blue);
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* --- 7. Chat Input Form --- */
+#message-input {
+    width: 100%; /* Make input take full width of its wrapper */
+    box-sizing: border-box; /* Important for padding */
+    background-color: var(--dark-navy);
+    border: 1px solid var(--lightest-navy);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+#message-input:focus {
+    border-color: var(--polaris-blue);
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
+}
+.send-button-container {
+    margin-left: 1rem;
+}
+.send-button-container button {
+    padding: 0.8rem;
+    width: 56px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(45deg, #0077b6, var(--polaris-blue));
+    box-shadow: 0 5px 15px rgba(0, 150, 255, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    color: white;
+}
+.send-button-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 175, 255, 0.3);
+}
+
+/* --- 8. Responsive Media Queries --- */
+@media (max-width: 900px) {
+    .sidebar {
+        position: absolute;
+        z-index: 100;
+        height: 100%;
+        margin-left: -272px;
+    }
+    .page-wrapper {
+        padding: 0;
+    }
+    .chat-messages,
+    .chat-input-form {
+        max-width: 100%; /* Allow content to be full-width on mobile */
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
