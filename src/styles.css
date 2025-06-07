@@ -1,0 +1,1315 @@
+/* --- Polaris Redesign - FINAL VERSION: Multi-Breakpoint Resilience --- */
+
+/* --- 1. Foundational & Atmospheric Styling --- */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, rgba(20, 30, 70, 0.3), rgba(0, 0, 0, 0) 60%);
+}
+
+/* --- 2. Layout & Composition (DEFAULT: Centered Monumentalism) --- */
+/* This centered layout is the robust default for most screens, including laptops. */
+.text-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Centered by default */
+    height: 100%;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    gap: 1.5rem;
+}
+
+/* --- 3. Typography: The Voice of the Design --- */
+
+#polaris-text {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    /* MODIFIED: The clamp() is now less aggressive to prevent wrapping on laptops. */
+    font-size: clamp(4rem, 13vw, 16rem);
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
+    text-align: center;
+    
+    /* ADDED: This is the mandate. It forbids the title from ever breaking. */
+    white-space: nowrap;
+    
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 2s cubic-bezier(0.165, 0.84, 0.44, 1) 0.5s forwards;
+}
+
+#demo-text, #subtext, #chat-button, .star-label {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#demo-text {
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #00bfff;
+    text-shadow: 0 0 10px rgba(0, 191, 255, 0.7);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) 1s forwards;
+}
+
+#subtext {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    max-width: 60ch;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) 1.2s forwards;
+}
+
+/* --- 4. Call to Action: Affordance & Style --- */
+#chat-button {
+    font-size: clamp(1rem, 1.8vw, 1.1rem);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 16px 50px;
+    margin-top: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(45deg, #0077b6, #00bfff);
+    box-shadow: 0 10px 30px rgba(0, 150, 255, 0.25);
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+                box-shadow 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) 1.4s forwards;
+}
+
+#chat-button:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 175, 255, 0.4);
+}
+
+/* --- 5. Starfield & Animations --- */
+.sky {
+    position: absolute;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    z-index: 1;
+    transition: transform 0.2s linear;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---
+   NEW: Breakpoint for XL Screens (The Showcase Layout)
+   These rules will ONLY apply on screens 1600px wide or larger,
+   overriding the centered layout to create the bold asymmetrical look.
+--- */
+@media (min-width: 1600px) {
+    .text-container {
+        align-items: flex-start; /* Switch to left-alignment */
+        gap: 0; /* Disable gap to use margins for more precise control */
+    }
+
+    #polaris-text {
+        font-size: clamp(16rem, 20vw, 22rem); /* Unleash the massive title size */
+        text-align: left;
+    }
+
+    /* We need to re-introduce the sub-container logic for alignment */
+    /* This requires adding the .sub-container div back into your HTML for this to work */
+    /* For simplicity with your current HTML, we'll align each item individually */
+    
+    #demo-text, #subtext, #chat-button {
+        margin-left: 0.5rem; /* Indent the items */
+    }
+
+    #demo-text { margin-top: 1rem; }
+    #subtext { margin-top: 1.5rem; text-align: left; }
+    #chat-button { margin-top: 2.5rem; }
+}
+
+.star-container { /* Unchanged */
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.star-label { /* Unchanged */
+    position: absolute;
+    top: -25px;
+    color: #fff;
+    font-family: 'Inter', sans-serif; /* Updated font */
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.star { /* Unchanged */
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #f0f0f0;
+    animation: glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes glow { /* Unchanged */
+    from { box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #f0f0f0; }
+    to { box-shadow: 0 0 15px #fff, 0 0 25px #fff, 0 0 35px #fff, 0 0 50px #f0f0f0; }
+}
+
+
+/* Polaris at center */
+#polaris-container {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Increased all distances by a factor of 1.8 to spread stars out */
+
+/* Sirius position relative to Polaris */
+#sirius-container {
+    top: calc(50% + 270px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+/* Vega - bright summer star */
+#vega-container {
+    top: calc(50% - 216px);
+    left: calc(50% + 324px);
+    transform: translate(-50%, -50%);
+}
+
+/* Betelgeuse - red supergiant */
+#betelgeuse-container {
+    top: calc(50% + 360px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+/* Rigel - blue supergiant */
+#rigel-container {
+    top: calc(50% + 396px);
+    left: calc(50% + 144px);
+    transform: translate(-50%, -50%);
+}
+
+/* Arcturus - orange giant */
+#arcturus-container {
+    top: calc(50% + 90px);
+    left: calc(50% - 450px);
+    transform: translate(-50%, -50%);
+}
+
+/* Capella - yellow giant */
+#capella-container {
+    top: calc(50% - 144px);
+    left: calc(50% - 270px);
+    transform: translate(-50%, -50%);
+}
+
+/* Altair - white star */
+#altair-container {
+    top: calc(50% - 90px);
+    left: calc(50% + 504px);
+    transform: translate(-50%, -50%);
+}
+
+/* Aldebaran - orange giant */
+#aldebaran-container {
+    top: calc(50% + 324px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+/* Spica - blue giant */
+#spica-container {
+    top: calc(50% + 180px);
+    left: calc(50% - 324px);
+    transform: translate(-50%, -50%);
+}
+
+/* Additional stars to fill space */
+#deneb-container {
+    top: calc(50% - 324px);
+    left: calc(50% + 216px);
+    transform: translate(-50%, -50%);
+}
+
+#antares-container {
+    top: calc(50% + 450px);
+    left: calc(50% - 180px);
+    transform: translate(-50%, -50%);
+}
+
+#pollux-container {
+    top: calc(50% - 72px);
+    left: calc(50% - 144px);
+    transform: translate(-50%, -50%);
+}
+
+#castor-container {
+    top: calc(50% - 108px);
+    left: calc(50% - 108px);
+    transform: translate(-50%, -50%);
+}
+
+#regulus-container {
+    top: calc(50% + 144px);
+    left: calc(50% + 270px);
+    transform: translate(-50%, -50%);
+}
+
+#procyon-container {
+    top: calc(50% + 72px);
+    left: calc(50% - 216px);
+    transform: translate(-50%, -50%);
+}
+
+#achernar-container {
+    top: calc(50% + 504px);
+    left: calc(50% + 324px);
+    transform: translate(-50%, -50%);
+}
+
+#canopus-container {
+    top: calc(50% + 540px);
+    left: calc(50% - 450px);
+    transform: translate(-50%, -50%);
+}
+
+#alphard-container {
+    top: calc(50% + 234px);
+    left: calc(50% - 54px);
+    transform: translate(-50%, -50%);
+}
+
+#hadar-container {
+    top: calc(50% + 576px);
+    left: calc(50% - 324px);
+    transform: translate(-50%, -50%);
+}
+
+#mira-container {
+    top: calc(50% - 360px);
+    left: calc(50% - 396px);
+    transform: translate(-50%, -50%);
+}
+
+#enif-container {
+    top: calc(50% - 252px);
+    left: calc(50% + 450px);
+    transform: translate(-50%, -50%);
+}
+
+#fomalhaut-container {
+    top: calc(50% + 612px);
+    left: calc(50% + 90px);
+    transform: translate(-50%, -50%);
+}
+
+#merak-container {
+    top: calc(50% - 144px);
+    left: calc(50% + 108px);
+    transform: translate(-50%, -50%);
+}
+
+#alkaid-container {
+    top: calc(50% - 216px);
+    left: calc(50% + 36px);
+    transform: translate(-50%, -50%);
+}
+
+#mizar-container {
+    top: calc(50% - 198px);
+    left: calc(50% + 144px);
+    transform: translate(-50%, -50%);
+}
+
+/* Outer ring of stars - farther from center */
+#shaula-container {
+    top: calc(50% + 630px);
+    left: calc(50% - 576px);
+    transform: translate(-50%, -50%);
+}
+
+#kochab-container {
+    top: calc(50% - 504px);
+    left: calc(50% - 270px);
+    transform: translate(-50%, -50%);
+}
+
+#mirach-container {
+    top: calc(50% - 450px);
+    left: calc(50% + 504px);
+    transform: translate(-50%, -50%);
+}
+
+#alpheratz-container {
+    top: calc(50% - 576px);
+    left: calc(50% + 360px);
+    transform: translate(-50%, -50%);
+}
+
+#hamal-container {
+    top: calc(50% - 324px);
+    left: calc(50% - 576px);
+    transform: translate(-50%, -50%);
+}
+
+#diphda-container {
+    top: calc(50% + 684px);
+    left: calc(50% + 270px);
+    transform: translate(-50%, -50%);
+}
+
+#nunki-container {
+    top: calc(50% + 396px);
+    left: calc(50% - 630px);
+    transform: translate(-50%, -50%);
+}
+
+#saiph-container {
+    top: calc(50% + 540px);
+    left: calc(50% + 504px);
+    transform: translate(-50%, -50%);
+}
+
+#mintaka-container {
+    top: calc(50% + 450px);
+    left: calc(50% + 576px);
+    transform: translate(-50%, -50%);
+}
+
+#alhena-container {
+    top: calc(50% - 630px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#gacrux-container {
+    top: calc(50% + 720px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#elnath-container {
+    top: calc(50% - 540px);
+    left: calc(50% - 504px);
+    transform: translate(-50%, -50%);
+}
+
+#alioth-container {
+    top: calc(50% - 288px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#rasalhague-container {
+    top: calc(50% + 90px);
+    left: calc(50% + 684px);
+    transform: translate(-50%, -50%);
+}
+
+#kaus-australis-container {
+    top: calc(50% + 324px);
+    left: calc(50% - 684px);
+    transform: translate(-50%, -50%);
+}
+
+#avior-container {
+    top: calc(50% + 756px);
+    left: calc(50% + 450px);
+    transform: translate(-50%, -50%);
+}
+
+#menkalinan-container {
+    top: calc(50% - 684px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#atria-container {
+    top: calc(50% + 810px);
+    left: calc(50% - 180px);
+    transform: translate(-50%, -50%);
+}
+
+#alnair-container {
+    top: calc(50% + 684px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#peacock-container {
+    top: calc(50% + 576px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#mirzam-container {
+    top: calc(50% + 270px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#polaris-australis-container {
+    top: calc(50% + 864px);
+    left: calc(50% + 90px);
+    transform: translate(-50%, -50%);
+}
+
+#scheat-container {
+    top: calc(50% - 720px);
+    left: calc(50% + 576px);
+    transform: translate(-50%, -50%);
+}
+
+#markab-container {
+    top: calc(50% - 630px);
+    left: calc(50% + 684px);
+    transform: translate(-50%, -50%);
+}
+
+#menkar-container {
+    top: calc(50% - 504px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#sabik-container {
+    top: calc(50% + 180px);
+    left: calc(50% - 756px);
+    transform: translate(-50%, -50%);
+}
+
+#schedar-container {
+    top: calc(50% - 810px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#caph-container {
+    top: calc(50% - 756px);
+    left: calc(50% - 504px);
+    transform: translate(-50%, -50%);
+}
+
+#etamin-container {
+    top: calc(50% - 270px);
+    left: calc(50% + 756px);
+    transform: translate(-50%, -50%);
+}
+
+/* Far outer ring of stars - even farther from center */
+#acrux-container {
+    top: calc(50% + 900px);
+    left: calc(50% - 540px);
+    transform: translate(-50%, -50%);
+}
+
+#adhara-container {
+    top: calc(50% + 810px);
+    left: calc(50% - 810px);
+    transform: translate(-50%, -50%);
+}
+
+#castor-b-container {
+    top: calc(50% - 900px);
+    left: calc(50% + 270px);
+    transform: translate(-50%, -50%);
+}
+
+#shaula-b-container {
+    top: calc(50% + 990px);
+    left: calc(50% + 360px);
+    transform: translate(-50%, -50%);
+}
+
+#miaplacidus-container {
+    top: calc(50% + 864px);
+    left: calc(50% + 720px);
+    transform: translate(-50%, -50%);
+}
+
+#eltanin-container {
+    top: calc(50% - 810px);
+    left: calc(50% + 810px);
+    transform: translate(-50%, -50%);
+}
+
+#sadr-container {
+    top: calc(50% - 990px);
+    left: calc(50% - 180px);
+    transform: translate(-50%, -50%);
+}
+
+#naos-container {
+    top: calc(50% + 1080px);
+    left: calc(50% - 270px);
+    transform: translate(-50%, -50%);
+}
+
+#almach-container {
+    top: calc(50% - 864px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#caph-b-container {
+    top: calc(50% - 1080px);
+    left: calc(50% + 450px);
+    transform: translate(-50%, -50%);
+}
+
+#izar-container {
+    top: calc(50% + 270px);
+    left: calc(50% - 900px);
+    transform: translate(-50%, -50%);
+}
+
+#murzim-container {
+    top: calc(50% + 630px);
+    left: calc(50% + 810px);
+    transform: translate(-50%, -50%);
+}
+
+#alphard-b-container {
+    top: calc(50% - 630px);
+    left: calc(50% - 900px);
+    transform: translate(-50%, -50%);
+}
+
+#gienah-container {
+    top: calc(50% + 450px);
+    left: calc(50% - 864px);
+    transform: translate(-50%, -50%);
+}
+
+#zeta-puppis-container {
+    top: calc(50% + 1044px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#alsephina-container {
+    top: calc(50% - 936px);
+    left: calc(50% + 684px);
+    transform: translate(-50%, -50%);
+}
+
+#delta-velorum-container {
+    top: calc(50% + 1170px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#aspidiske-container {
+    top: calc(50% + 936px);
+    left: calc(50% - 936px);
+    transform: translate(-50%, -50%);
+}
+
+#suhail-container {
+    top: calc(50% + 1224px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#alphecca-container {
+    top: calc(50% - 450px);
+    left: calc(50% + 900px);
+    transform: translate(-50%, -50%);
+}
+
+#vindemiatrix-container {
+    top: calc(50% + 90px);
+    left: calc(50% + 990px);
+    transform: translate(-50%, -50%);
+}
+
+#phecda-container {
+    top: calc(50% - 1170px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#megrez-container {
+    top: calc(50% - 1044px);
+    left: calc(50% - 630px);
+    transform: translate(-50%, -50%);
+}
+
+#gienah-corvi-container {
+    top: calc(50% + 720px);
+    left: calc(50% - 1080px);
+    transform: translate(-50%, -50%);
+}
+
+#kraz-container {
+    top: calc(50% + 540px);
+    left: calc(50% - 990px);
+    transform: translate(-50%, -50%);
+}
+
+#algorab-container {
+    top: calc(50% + 630px);
+    left: calc(50% - 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#markeb-container {
+    top: calc(50% + 1260px);
+    left: calc(50% - 450px);
+    transform: translate(-50%, -50%);
+}
+
+#sargas-container {
+    top: calc(50% + 1080px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#avior-b-container {
+    top: calc(50% + 1350px);
+    left: calc(50% + 90px);
+    transform: translate(-50%, -50%);
+}
+
+#muscida-container {
+    top: calc(50% - 1260px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#alderamin-container {
+    top: calc(50% - 990px);
+    left: calc(50% + 990px);
+    transform: translate(-50%, -50%);
+}
+
+#alfirk-container {
+    top: calc(50% - 1350px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#ankaa-container {
+    top: calc(50% + 1170px);
+    left: calc(50% + 810px);
+    transform: translate(-50%, -50%);
+}
+
+#girtab-container {
+    top: calc(50% + 900px);
+    left: calc(50% - 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#zubenelgenubi-container {
+    top: calc(50% + 360px);
+    left: calc(50% + 1080px);
+    transform: translate(-50%, -50%);
+}
+
+#zubeneschamali-container {
+    top: calc(50% + 180px);
+    left: calc(50% + 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#unukalhai-container {
+    top: calc(50% - 180px);
+    left: calc(50% - 1080px);
+    transform: translate(-50%, -50%);
+}
+
+#sheratan-container {
+    top: calc(50% - 540px);
+    left: calc(50% - 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#ruchbah-container {
+    top: calc(50% - 1224px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#alfirk-b-container {
+    top: calc(50% - 1440px);
+    left: calc(50% + 360px);
+    transform: translate(-50%, -50%);
+}
+
+
+.star-label {
+    position: absolute;
+    top: -25px;
+    color: #fff;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Rigel label below the star to avoid collision */
+#rigel-container .star-label {
+    top: auto;
+    bottom: -25px;
+}
+
+/* Fix label collisions for closely grouped stars */
+#pollux-container .star-label {
+    top: auto;
+    bottom: -25px;
+}
+
+#merak-container .star-label {
+    top: auto;
+    bottom: -25px;
+}
+
+/* Sirius is brighter */
+#sirius {
+    width: 10px;
+    height: 10px;
+    animation: glow-bright 3s ease-in-out infinite alternate;
+}
+
+/* Vega - very bright white */
+#vega {
+    width: 9px;
+    height: 9px;
+    animation: glow-bright 3.5s ease-in-out infinite alternate;
+}
+
+/* Betelgeuse - red supergiant */
+#betelgeuse {
+    width: 11px;
+    height: 11px;
+    background-color: #ffcccc;
+    animation: glow-red 4.5s ease-in-out infinite alternate;
+}
+
+/* Rigel - blue supergiant */
+#rigel {
+    width: 9px;
+    height: 9px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3s ease-in-out infinite alternate;
+}
+
+/* Arcturus - orange giant */
+#arcturus {
+    width: 9px;
+    height: 9px;
+    background-color: #ffe0cc;
+    animation: glow-orange 4s ease-in-out infinite alternate;
+}
+
+/* Capella - yellow */
+#capella {
+    width: 8px;
+    height: 8px;
+    background-color: #ffffcc;
+    animation: glow-yellow 3.8s ease-in-out infinite alternate;
+}
+
+/* Altair - white */
+#altair {
+    width: 8px;
+    height: 8px;
+    animation: glow 3.2s ease-in-out infinite alternate;
+}
+
+/* Aldebaran - orange giant */
+#aldebaran {
+    width: 9px;
+    height: 9px;
+    background-color: #ffddcc;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+/* Spica - blue */
+#spica {
+    width: 8px;
+    height: 8px;
+    background-color: #ccccff;
+    animation: glow-blue 3.6s ease-in-out infinite alternate;
+}
+
+/* Additional star styles */
+#deneb {
+    width: 9px;
+    height: 9px;
+    animation: glow-bright 3.8s ease-in-out infinite alternate;
+}
+
+#antares {
+    width: 10px;
+    height: 10px;
+    background-color: #ff9999;
+    animation: glow-red 5s ease-in-out infinite alternate;
+}
+
+#pollux, #castor {
+    width: 7px;
+    height: 7px;
+    background-color: #ffffdd;
+    animation: glow-yellow 3.5s ease-in-out infinite alternate;
+}
+
+#regulus {
+    width: 8px;
+    height: 8px;
+    background-color: #ddddff;
+    animation: glow-blue 3.3s ease-in-out infinite alternate;
+}
+
+#procyon {
+    width: 8px;
+    height: 8px;
+    background-color: #fffff0;
+    animation: glow 3.4s ease-in-out infinite alternate;
+}
+
+#achernar, #canopus {
+    width: 9px;
+    height: 9px;
+    animation: glow-bright 3.7s ease-in-out infinite alternate;
+}
+
+#alphard {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0b0;
+    animation: glow-orange 4.1s ease-in-out infinite alternate;
+}
+
+#hadar {
+    width: 8px;
+    height: 8px;
+    background-color: #ccddff;
+    animation: glow-blue 3.4s ease-in-out infinite alternate;
+}
+
+#mira {
+    width: 8px;
+    height: 8px;
+    background-color: #ffcccc;
+    animation: glow-red 6s ease-in-out infinite alternate;
+}
+
+#enif {
+    width: 7px;
+    height: 7px;
+    background-color: #ffc0a0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#fomalhaut {
+    width: 8px;
+    height: 8px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#merak, #alkaid, #mizar {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.5s ease-in-out infinite alternate;
+}
+
+/* New outer stars */
+#shaula, #nunki, #kaus-australis {
+    width: 7px;
+    height: 7px;
+    background-color: #d0d0ff;
+    animation: glow-blue 3.7s ease-in-out infinite alternate;
+}
+
+#kochab {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0a0;
+    animation: glow-orange 4s ease-in-out infinite alternate;
+}
+
+#mirach, #alpheratz, #hamal {
+    width: 7px;
+    height: 7px;
+    background-color: #ffdddd;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#diphda, #menkar {
+    width: 8px;
+    height: 8px;
+    background-color: #ffc0a0;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+#saiph, #mintaka {
+    width: 7px;
+    height: 7px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3.3s ease-in-out infinite alternate;
+}
+
+#alhena, #elnath {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#gacrux {
+    width: 7px;
+    height: 7px;
+    background-color: #ff9999;
+    animation: glow-red 4.5s ease-in-out infinite alternate;
+}
+
+#alioth, #menkalinan {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.5s ease-in-out infinite alternate;
+}
+
+#rasalhague {
+    width: 7px;
+    height: 7px;
+    background-color: #f0f0f0;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#avior {
+    width: 8px;
+    height: 8px;
+    background-color: #ffd0b0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#atria {
+    width: 8px;
+    height: 8px;
+    background-color: #ffc0c0;
+    animation: glow-orange 4.1s ease-in-out infinite alternate;
+}
+
+#alnair, #peacock {
+    width: 7px;
+    height: 7px;
+    background-color: #e8e8ff;
+    animation: glow-blue 3.6s ease-in-out infinite alternate;
+}
+
+#mirzam {
+    width: 6px;
+    height: 6px;
+    background-color: #d0d0ff;
+    animation: glow-blue 3.4s ease-in-out infinite alternate;
+}
+
+#polaris-australis {
+    width: 6px;
+    height: 6px;
+    animation: glow 4s ease-in-out infinite alternate;
+}
+
+#scheat, #markab {
+    width: 7px;
+    height: 7px;
+    background-color: #ffe0e0;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#sabik {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#schedar, #caph {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0a0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#etamin {
+    width: 7px;
+    height: 7px;
+    background-color: #ffc090;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+/* Far outer stars */
+#acrux, #gacrux {
+    width: 8px;
+    height: 8px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3.5s ease-in-out infinite alternate;
+}
+
+#adhara {
+    width: 8px;
+    height: 8px;
+    background-color: #f0f0ff;
+    animation: glow-bright 3.3s ease-in-out infinite alternate;
+}
+
+#castor-b, #shaula-b {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#miaplacidus {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#eltanin, #sadr {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0a0;
+    animation: glow-orange 4.1s ease-in-out infinite alternate;
+}
+
+#naos {
+    width: 7px;
+    height: 7px;
+    background-color: #c0c0ff;
+    animation: glow-blue 3.2s ease-in-out infinite alternate;
+}
+
+#almach {
+    width: 7px;
+    height: 7px;
+    background-color: #ffc0b0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#caph-b, #izar {
+    width: 6px;
+    height: 6px;
+    background-color: #ffe0cc;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#murzim, #alphard-b {
+    width: 6px;
+    height: 6px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3.5s ease-in-out infinite alternate;
+}
+
+#gienah, #gienah-corvi {
+    width: 6px;
+    height: 6px;
+    background-color: #f0f0f0;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#zeta-puppis {
+    width: 7px;
+    height: 7px;
+    background-color: #b0b0ff;
+    animation: glow-blue 3.1s ease-in-out infinite alternate;
+}
+
+#alsephina, #delta-velorum {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.9s ease-in-out infinite alternate;
+}
+
+#aspidiske, #suhail {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0c0;
+    animation: glow-orange 4s ease-in-out infinite alternate;
+}
+
+#alphecca {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#vindemiatrix {
+    width: 6px;
+    height: 6px;
+    background-color: #ffffe0;
+    animation: glow-yellow 3.8s ease-in-out infinite alternate;
+}
+
+#phecda, #megrez {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#kraz, #algorab {
+    width: 6px;
+    height: 6px;
+    background-color: #f0f0f0;
+    animation: glow 3.9s ease-in-out infinite alternate;
+}
+
+#markeb, #sargas {
+    width: 6px;
+    height: 6px;
+    background-color: #d0d0ff;
+    animation: glow-blue 3.6s ease-in-out infinite alternate;
+}
+
+#avior-b {
+    width: 6px;
+    height: 6px;
+    background-color: #ffd0b0;
+    animation: glow-orange 4.0s ease-in-out infinite alternate;
+}
+
+#muscida {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#alderamin {
+    width: 7px;
+    height: 7px;
+    background-color: #f5f5f5;
+    animation: glow 3.9s ease-in-out infinite alternate;
+}
+
+#alfirk {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#ankaa {
+    width: 6px;
+    height: 6px;
+    background-color: #ffc0a0;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+#girtab {
+    width: 7px;
+    height: 7px;
+    background-color: #d0e0ff;
+    animation: glow-blue 3.5s ease-in-out infinite alternate;
+}
+
+#zubenelgenubi, #zubeneschamali {
+    width: 7px;
+    height: 7px;
+    background-color: #e0f0ff;
+    animation: glow-bright 3.4s ease-in-out infinite alternate;
+}
+
+#unukalhai {
+    width: 6px;
+    height: 6px;
+    background-color: #ffe0c0;
+    animation: glow-orange 4.0s ease-in-out infinite alternate;
+}
+
+#sheratan {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#ruchbah {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#alfirk-b {
+    width: 5px;
+    height: 5px;
+    animation: glow 4.0s ease-in-out infinite alternate;
+}
+
+
+/* Specific color glows */
+@keyframes glow-bright {
+    from {
+        box-shadow: 0 0 12px #fff, 0 0 25px #fff, 0 0 35px #fff, 0 0 45px #f0f0f0;
+    }
+    to {
+        box-shadow: 0 0 18px #fff, 0 0 30px #fff, 0 0 40px #fff, 0 0 60px #f0f0f0;
+    }
+}
+
+@keyframes glow-red {
+    from {
+        box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff3333, 0 0 40px #ff6666;
+    }
+    to {
+        box-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000, 0 0 35px #ff3333, 0 0 50px #ff6666;
+    }
+}
+
+@keyframes glow-blue {
+    from {
+        box-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff, 0 0 30px #3333ff, 0 0 40px #6666ff;
+    }
+    to {
+        box-shadow: 0 0 15px #0000ff, 0 0 25px #0000ff, 0 0 35px #3333ff, 0 0 50px #6666ff;
+    }
+}
+
+@keyframes glow-orange {
+    from {
+        box-shadow: 0 0 10px #ffa500, 0 0 20px #ffa500, 0 0 30px #ffb533, 0 0 40px #ffc566;
+    }
+    to {
+        box-shadow: 0 0 15px #ffa500, 0 0 25px #ffa500, 0 0 35px #ffb533, 0 0 50px #ffc566;
+    }
+}
+
+@keyframes glow-yellow {
+    from {
+        box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff33, 0 0 40px #ffff66;
+    }
+    to {
+        box-shadow: 0 0 15px #ffff00, 0 0 25px #ffff00, 0 0 35px #ffff33, 0 0 50px #ffff66;
+    }
+}
