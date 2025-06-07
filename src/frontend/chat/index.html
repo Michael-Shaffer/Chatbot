@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaris - Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sky">
+        
+    </div>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" class="home-link">Polaris</a>
+                <h2>Documents</h2>
+            </div>
+            <nav class="document-list">
+                <a href="#" class="document-item active">4428</a>
+                <a href="#" class="document-item">404</a>
+                <a href="#" class="document-item">408</a>
+                <a href="#" class="document-item">409</a>
+            </nav>
+        </aside>
+
+        <main class="chat-interface">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-message">
+                    <div class="bot-avatar">P</div>
+                    <div class="message-content">
+                        <p>Welcome to Polaris. I have access to the selected documents. How can I assist you?</p>
+                    </div>
+                </div>
+            </div>
+            
+            <form class="chat-input-form" id="chat-form">
+                <div id="message-input-wrapper">
+                    <input type="text" id="message-input" placeholder="Ask a question..." autocomplete="off">
+                </div>
+                <div class="send-button-container">
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                        </svg>                      
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
