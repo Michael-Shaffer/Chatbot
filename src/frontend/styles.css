@@ -1,6 +1,19 @@
-/* --- Polaris Redesign - FINAL VERSION: Multi-Breakpoint Resilience --- */
+:root {
+    --accent-primary: #D4A056; 
+    --bg-primary: #171A21;
+    --bg-secondary: #232834;
+    --bg-tertiary: #303747;
+    --text-primary: #EAEBEE;
+    --text-secondary: #A0AEC0;
+    --border-primary: #333948;
+    --success-green: #18A999;
+    --accent-primary-muted: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    --user-bubble-bg: var(--accent-primary);
+    --accent-primary-hover: color-mix(in srgb, var(--accent-primary) 85%, black);
+    --font-family-sans: 'Segoe UI', Calibri, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-serif: Georgia, 'Times New Roman', serif;
+}
 
-/* --- 1. Foundational & Atmospheric Styling --- */
 body {
     margin: 0;
     padding: 0;
@@ -11,15 +24,13 @@ body {
     background-image: radial-gradient(circle at 50% 50%, rgba(20, 30, 70, 0.3), rgba(0, 0, 0, 0) 60%);
 }
 
-/* --- 2. Layout & Composition (DEFAULT: Centered Monumentalism) --- */
-/* This centered layout is the robust default for most screens, including laptops. */
 .text-container {
     position: relative;
     z-index: 10;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center; /* Centered by default */
+    align-items: center;
     height: 100%;
     width: 90%;
     max-width: 1200px;
@@ -29,21 +40,15 @@ body {
     gap: 1.5rem;
 }
 
-/* --- 3. Typography: The Voice of the Design --- */
-
 #polaris-text {
     font-family: Georgia, 'Times New Roman', serif;
     font-weight: 700;
-    /* MODIFIED: The clamp() is now less aggressive to prevent wrapping on laptops. */
     font-size: clamp(4rem, 13vw, 16rem);
     line-height: 1;
     color: #ffffff;
     text-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
     text-align: center;
-    
-    /* ADDED: This is the mandate. It forbids the title from ever breaking. */
     white-space: nowrap;
-    
     opacity: 0;
     transform: translateY(20px);
     animation: fadeIn 2s cubic-bezier(0.165, 0.84, 0.44, 1) 0.5s forwards;
@@ -54,11 +59,12 @@ body {
 }
 
 #demo-text {
-    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    font-size: clamp(0.9rem, 1.5vw, 1.5rem);
     font-weight: 600;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #00bfff;
+    color: #d4a056;
+    /* color: #00bfff; */
     text-shadow: 0 0 10px rgba(0, 191, 255, 0.7);
     opacity: 0;
     transform: translateY(20px);
@@ -77,7 +83,6 @@ body {
     animation: fadeIn 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) 1.2s forwards;
 }
 
-/* --- 4. Call to Action: Affordance & Style --- */
 #chat-button {
     font-size: clamp(1rem, 1.8vw, 1.1rem);
     font-weight: 600;
@@ -89,7 +94,8 @@ body {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    background: linear-gradient(45deg, #0077b6, #00bfff);
+    /* background: linear-gradient(45deg, #0077b6, #00bfff); */
+    background: linear-gradient(45deg, #8A651A, #D4A056);
     box-shadow: 0 10px 30px rgba(0, 150, 255, 0.25);
     transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
                 box-shadow 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -103,7 +109,7 @@ body {
     box-shadow: 0 15px 40px rgba(0, 175, 255, 0.4);
 }
 
-/* --- 5. Starfield & Animations --- */
+/* Starfield */
 .sky {
     position: absolute;
     top: -5%;
@@ -121,28 +127,19 @@ body {
     }
 }
 
-/* ---
-   NEW: Breakpoint for XL Screens (The Showcase Layout)
-   These rules will ONLY apply on screens 1600px wide or larger,
-   overriding the centered layout to create the bold asymmetrical look.
---- */
 @media (min-width: 1600px) {
     .text-container {
-        align-items: flex-start; /* Switch to left-alignment */
-        gap: 0; /* Disable gap to use margins for more precise control */
+        align-items: flex-start;
+        gap: 0; 
     }
 
     #polaris-text {
-        font-size: clamp(16rem, 20vw, 22rem); /* Unleash the massive title size */
+        font-size: clamp(16rem, 20vw, 22rem);
         text-align: left;
     }
 
-    /* We need to re-introduce the sub-container logic for alignment */
-    /* This requires adding the .sub-container div back into your HTML for this to work */
-    /* For simplicity with your current HTML, we'll align each item individually */
-    
     #demo-text, #subtext, #chat-button {
-        margin-left: 0.5rem; /* Indent the items */
+        margin-left: 0.5rem;
     }
 
     #demo-text { margin-top: 1rem; }
@@ -150,7 +147,7 @@ body {
     #chat-button { margin-top: 2.5rem; }
 }
 
-.star-container { /* Unchanged */
+.star-container {
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -158,11 +155,11 @@ body {
     gap: 20px;
 }
 
-.star-label { /* Unchanged */
+.star-label {
     position: absolute;
     top: -25px;
     color: #fff;
-    font-family: 'Inter', sans-serif; /* Updated font */
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
@@ -170,7 +167,7 @@ body {
     white-space: nowrap;
 }
 
-.star { /* Unchanged */
+.star {
     width: 8px;
     height: 8px;
     background-color: #fff;
@@ -179,7 +176,7 @@ body {
     animation: glow 4s ease-in-out infinite alternate;
 }
 
-@keyframes glow { /* Unchanged */
+@keyframes glow {
     from { box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #f0f0f0; }
     to { box-shadow: 0 0 15px #fff, 0 0 25px #fff, 0 0 35px #fff, 0 0 50px #f0f0f0; }
 }
@@ -192,72 +189,62 @@ body {
     transform: translate(-50%, -50%);
 }
 
-/* Increased all distances by a factor of 1.8 to spread stars out */
 
-/* Sirius position relative to Polaris */
+/* Star positions relative to Polaris */
 #sirius-container {
     top: calc(50% + 270px);
     left: calc(50% - 360px);
     transform: translate(-50%, -50%);
 }
 
-/* Vega - bright summer star */
 #vega-container {
     top: calc(50% - 216px);
     left: calc(50% + 324px);
     transform: translate(-50%, -50%);
 }
 
-/* Betelgeuse - red supergiant */
 #betelgeuse-container {
     top: calc(50% + 360px);
     left: calc(50% + 180px);
     transform: translate(-50%, -50%);
 }
 
-/* Rigel - blue supergiant */
 #rigel-container {
     top: calc(50% + 396px);
     left: calc(50% + 144px);
     transform: translate(-50%, -50%);
 }
 
-/* Arcturus - orange giant */
 #arcturus-container {
     top: calc(50% + 90px);
     left: calc(50% - 450px);
     transform: translate(-50%, -50%);
 }
 
-/* Capella - yellow giant */
 #capella-container {
     top: calc(50% - 144px);
     left: calc(50% - 270px);
     transform: translate(-50%, -50%);
 }
 
-/* Altair - white star */
 #altair-container {
     top: calc(50% - 90px);
     left: calc(50% + 504px);
     transform: translate(-50%, -50%);
 }
 
-/* Aldebaran - orange giant */
 #aldebaran-container {
     top: calc(50% + 324px);
     left: calc(50% - 90px);
     transform: translate(-50%, -50%);
 }
 
-/* Spica - blue giant */
 #spica-container {
     top: calc(50% + 180px);
     left: calc(50% - 324px);
     transform: translate(-50%, -50%);
 }
 
-/* Additional stars to fill space */
 #deneb-container {
     top: calc(50% - 324px);
     left: calc(50% + 216px);
@@ -783,13 +770,11 @@ body {
     white-space: nowrap;
 }
 
-/* Rigel label below the star to avoid collision */
 #rigel-container .star-label {
     top: auto;
     bottom: -25px;
 }
 
-/* Fix label collisions for closely grouped stars */
 #pollux-container .star-label {
     top: auto;
     bottom: -25px;
@@ -800,21 +785,18 @@ body {
     bottom: -25px;
 }
 
-/* Sirius is brighter */
 #sirius {
     width: 10px;
     height: 10px;
     animation: glow-bright 3s ease-in-out infinite alternate;
 }
 
-/* Vega - very bright white */
 #vega {
     width: 9px;
     height: 9px;
     animation: glow-bright 3.5s ease-in-out infinite alternate;
 }
 
-/* Betelgeuse - red supergiant */
 #betelgeuse {
     width: 11px;
     height: 11px;
@@ -822,7 +804,6 @@ body {
     animation: glow-red 4.5s ease-in-out infinite alternate;
 }
 
-/* Rigel - blue supergiant */
 #rigel {
     width: 9px;
     height: 9px;
@@ -830,7 +811,6 @@ body {
     animation: glow-blue 3s ease-in-out infinite alternate;
 }
 
-/* Arcturus - orange giant */
 #arcturus {
     width: 9px;
     height: 9px;
@@ -838,7 +818,6 @@ body {
     animation: glow-orange 4s ease-in-out infinite alternate;
 }
 
-/* Capella - yellow */
 #capella {
     width: 8px;
     height: 8px;
@@ -846,14 +825,12 @@ body {
     animation: glow-yellow 3.8s ease-in-out infinite alternate;
 }
 
-/* Altair - white */
 #altair {
     width: 8px;
     height: 8px;
     animation: glow 3.2s ease-in-out infinite alternate;
 }
 
-/* Aldebaran - orange giant */
 #aldebaran {
     width: 9px;
     height: 9px;
@@ -861,7 +838,6 @@ body {
     animation: glow-orange 4.2s ease-in-out infinite alternate;
 }
 
-/* Spica - blue */
 #spica {
     width: 8px;
     height: 8px;
