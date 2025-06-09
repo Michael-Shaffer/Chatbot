@@ -3,22 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const starContainers = document.querySelectorAll('.star-container');
     const proximityThreshold = 75;
 
-    // --- CRITIQUE ADDRESSED: Adds a parallax effect to make the background immersive ---
     document.addEventListener('mousemove', (e) => {
         // Calculate mouse position from center (-0.5 to 0.5)
         const mouseX = e.clientX / window.innerWidth - 0.5;
         const mouseY = e.clientY / window.innerHeight - 0.5;
-        
-        // Move the sky opposite to the mouse direction. The multiplier determines the depth.
+
         const parallaxFactor = 30;
         const skyX = -mouseX * parallaxFactor;
         const skyY = -mouseY * parallaxFactor;
-        
+
         sky.style.transform = `translate(${skyX}px, ${skyY}px)`;
     });
 
 
-    // --- Proximity detection for star labels (same logic as before) ---
+    // Proximity detection for star labels (same logic as before)
     document.addEventListener('mousemove', (e) => {
         const mouseX = e.clientX;
         const mouseY = e.clientY;
