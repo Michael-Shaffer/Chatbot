@@ -34,6 +34,11 @@ def patch_sharded_checkpoint(model_path, output_path):
 
         for key, tensor in state_dict.items():
             new_key = key
+            # *** FIX: Do not rename the lm_head layer ***
+            if 'lm_head' in key:
+                new_state_dict[new_key] = tensor
+                continue
+
             for old_suffix, new_suffix in TENSOR_NAME_MAP.items():
                 if key.endswith(f".{old_suffix}"):
                     new_key = key[:-len(old_suffix)] + new_suffix
@@ -48,13 +53,11 @@ def patch_sharded_checkpoint(model_path, output_path):
         print(f"    Renamed {renamed_in_shard} tensors in this shard.")
         total_renamed_count += renamed_in_shard
 
-        # Save the patched shard to the output directory
         new_shard_path = os.path.join(output_path, shard_filename)
         save_file(new_state_dict, new_shard_path)
 
     print(f"Total tensors renamed across all shards: {total_renamed_count}")
     
-    # Copy the index file to the output directory
     shutil.copy(index_path, os.path.join(output_path, "model.safetensors.index.json"))
     print("Copied model index file.")
 
@@ -69,6 +72,11 @@ def patch_single_file_checkpoint(model_path, output_path):
 
     for key, tensor in state_dict.items():
         new_key = key
+        # *** FIX: Do not rename the lm_head layer ***
+        if 'lm_head' in key:
+            new_state_dict[new_key] = tensor
+            continue
+
         for old_suffix, new_suffix in TENSOR_NAME_MAP.items():
             if key.endswith(f".{old_suffix}"):
                 new_key = key[:-len(old_suffix)] + new_suffix
@@ -93,10 +101,8 @@ def patch_checkpoint(model_path, output_path):
     """
     print(f"Starting patch process for model at: {model_path}")
     
-    # Ensure output directory exists
     os.makedirs(output_path, exist_ok=True)
     
-    # --- Step 1: Detect format and patch the state dictionary/dictionaries ---
     index_path = os.path.join(model_path, "model.safetensors.index.json")
     single_file_path = os.path.join(model_path, "model.safetensors")
 
@@ -109,10 +115,14 @@ def patch_checkpoint(model_path, output_path):
             f"Could not find 'model.safetensors' or 'model.safetensors.index.json' in {model_path}"
         )
 
-    # --- Step 2: Load, normalize, and save the quantization config ---
     config_path = os.path.join(model_path, "quantization_config.json")
     if not os.path.exists(config_path):
-        raise FileNotFoundError(f"Could not find quantization_config.json in {model_path}")
+        config_path_alt = os.path.join(model_path, "quant_config.json")
+        if os.path.exists(config_path_alt):
+            config_path = config_path_alt
+            print("Note: Using 'quant_config.json' as quantization configuration file.")
+        else:
+            raise FileNotFoundError(f"Could not find 'quantization_config.json' or 'quant_config.json' in {model_path}")
 
     with open(config_path, "r") as f:
         quant_config = json.load(f)
@@ -125,12 +135,10 @@ def patch_checkpoint(model_path, output_path):
         json.dump(quant_config, f, indent=2)
     print(f"Normalized quantization_config.json saved to: {new_config_path}")
 
-    # --- Step 3: Copy over any other necessary files ---
     print("Copying remaining model files (tokenizer, etc.)...")
     copied_files = 0
     for filename in os.listdir(model_path):
-        # Skip files that were created by the patch process
-        if "safetensors" in filename or filename == "quantization_config.json":
+        if "safetensors" in filename or "quant_config" in filename:
             continue
         
         source_file = os.path.join(model_path, filename)
