@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """
-Simple vLLM Chatbot Web Server
-Just ask questions and get answers - no document processing
+Simple Flask Chatbot with Streaming Responses
+No documents, no ChromaDB - just pure chat with streaming
 """
 
 import os
+import time
+import json
 import logging
 
 # Disable vLLM tracking
 os.environ["VLLM_DO_NOT_TRACK"] = "1"
 
-from flask import Flask, request, jsonify, render_template_string, Response
+from flask import Flask, request, render_template_string, Response
 from vllm import LLM, SamplingParams
-import json
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -55,12 +56,12 @@ def format_chat_prompt(user_message: str) -> str:
 # Flask web application
 app = Flask(__name__)
 
-# Simple HTML interface with streaming
+# HTML template with Server-Sent Events for streaming
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple AI Chatbot</title>
+    <title>Streaming AI Chatbot</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -93,6 +94,7 @@ HTML_TEMPLATE = '''
         .assistant { 
             background-color: #f8f9fa; 
             border: 1px solid #dee2e6;
+            white-space: pre-wrap;
         }
         .input-container {
             display: flex;
@@ -121,31 +123,32 @@ HTML_TEMPLATE = '''
             background-color: #6c757d;
             cursor: not-allowed;
         }
-        .typing {
-            opacity: 0.7;
-            font-style: italic;
-        }
         h1 {
             text-align: center;
             color: #333;
         }
+        .typing {
+            opacity: 0.7;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-    <h1>🤖 Simple AI Chatbot</h1>
+    <h1>🤖 Streaming AI Chatbot</h1>
     
     <div class="chat-container" id="chatContainer"></div>
     
     <div class="input-container">
         <input type="text" id="messageInput" placeholder="Ask me anything..." 
-               onkeypress="if(event.key==='Enter' && !event.shiftKey) sendMessage()">
+               onkeypress="if(event.key==='Enter') sendMessage()">
         <button id="sendButton" onclick="sendMessage()">Send</button>
     </div>
 
     <script>
         let isGenerating = false;
+        let currentAssistantDiv = null;
 
-        async function sendMessage() {
+        function sendMessage() {
             if (isGenerating) return;
             
             const input = document.getElementById('messageInput');
@@ -163,68 +166,50 @@ HTML_TEMPLATE = '''
             sendButton.disabled = true;
             sendButton.textContent = 'Generating...';
             
-            // Add typing indicator
-            const typingDiv = addMessage('Thinking...', 'assistant', true);
+            // Create assistant message div for streaming
+            currentAssistantDiv = addMessage('', 'assistant');
             
-            try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message: message})
-                });
+            // Start Server-Sent Events connection
+            const eventSource = new EventSource('/stream?message=' + encodeURIComponent(message));
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
                 
-                // Remove typing indicator
-                typingDiv.remove();
+                if (data.token) {
+                    // Add token to current message
+                    currentAssistantDiv.textContent += data.token;
+                    scrollToBottom();
+                } else if (data.done) {
+                    // Streaming finished
+                    eventSource.close();
+                    isGenerating = false;
+                    sendButton.disabled = false;
+                    sendButton.textContent = 'Send';
+                    input.focus();
+                    currentAssistantDiv = null;
+                }
+            };
+            
+            eventSource.onerror = function(event) {
+                console.error('EventSource failed:', event);
+                eventSource.close();
                 
-                if (response.ok) {
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    
-                    const messageDiv = addMessage('', 'assistant');
-                    let fullResponse = '';
-                    
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        
-                        const chunk = decoder.decode(value);
-                        const lines = chunk.split('\\n');
-                        
-                        for (const line of lines) {
-                            if (line.startsWith('data: ')) {
-                                try {
-                                    const data = JSON.parse(line.slice(6));
-                                    if (data.token) {
-                                        fullResponse += data.token;
-                                        messageDiv.textContent = fullResponse;
-                                        scrollToBottom();
-                                    }
-                                } catch (e) {
-                                    // Ignore malformed JSON
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    addMessage('Error: Could not get response', 'assistant');
+                if (currentAssistantDiv && currentAssistantDiv.textContent === '') {
+                    currentAssistantDiv.textContent = 'Error: Could not get response';
                 }
                 
-            } catch (error) {
-                typingDiv.remove();
-                addMessage('Error: Connection failed', 'assistant');
-            } finally {
                 isGenerating = false;
                 sendButton.disabled = false;
                 sendButton.textContent = 'Send';
                 input.focus();
-            }
+                currentAssistantDiv = null;
+            };
         }
         
-        function addMessage(text, sender, isTyping = false) {
+        function addMessage(text, sender) {
             const container = document.getElementById('chatContainer');
             const div = document.createElement('div');
             div.className = `message ${sender}`;
-            if (isTyping) div.className += ' typing';
             div.textContent = text;
             container.appendChild(div);
             scrollToBottom();
@@ -238,7 +223,7 @@ HTML_TEMPLATE = '''
         
         // Add welcome message
         window.onload = function() {
-            addMessage('Hello! I\\'m ready to answer your questions. What would you like to know?', 'assistant');
+            addMessage('Hello! I\\'m ready to answer your questions. Ask me anything!', 'assistant');
             document.getElementById('messageInput').focus();
         };
     </script>
@@ -251,54 +236,60 @@ def index():
     """Serve the chat interface"""
     return render_template_string(HTML_TEMPLATE)
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    """Handle chat messages with streaming"""
-    try:
-        data = request.json
-        user_message = data.get('message', '')
-        
-        if not user_message:
-            return jsonify({'error': 'No message provided'}), 400
-        
-        # Format the prompt
-        formatted_prompt = format_chat_prompt(user_message)
-        
-        def generate():
+@app.route('/stream')
+def stream():
+    """Stream the AI response using Server-Sent Events"""
+    user_message = request.args.get('message', '')
+    
+    if not user_message:
+        return Response("data: " + json.dumps({"error": "No message provided"}) + "\n\n", 
+                       mimetype='text/plain')
+    
+    def generate():
+        try:
+            logger.info(f"Streaming response for: {user_message}")
+            
+            # Format the prompt
+            formatted_prompt = format_chat_prompt(user_message)
+            
             # Generate response
-            outputs = llm.generate(formatted_prompt, sampling_params)
+            outputs = llm.generate([formatted_prompt], sampling_params)
             response = outputs[0].outputs[0].text.strip()
             
-            # Stream the response word by word
+            # Split response into words and stream them
             words = response.split()
+            
             for i, word in enumerate(words):
                 if i == 0:
                     token = word
                 else:
                     token = " " + word
                 
+                # Send each word with a small delay for streaming effect
                 yield f"data: {json.dumps({'token': token})}\\n\\n"
+                time.sleep(0.05)  # Small delay between words
             
             # Signal completion
             yield f"data: {json.dumps({'done': True})}\\n\\n"
-        
-        return Response(generate(), mimetype='text/plain')
-        
-    except Exception as e:
-        logger.error(f"Error in chat: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+            
+        except Exception as e:
+            logger.error(f"Error in streaming: {e}")
+            yield f"data: {json.dumps({'token': f'Error: {str(e)}'})}\\n\\n"
+            yield f"data: {json.dumps({'done': True})}\\n\\n"
+    
+    return Response(generate(), mimetype='text/plain')
 
 @app.route('/health')
 def health():
     """Health check endpoint"""
-    return jsonify({'status': 'healthy', 'model': 'loaded'})
+    return {"status": "healthy", "model": "loaded"}
 
 if __name__ == '__main__':
     print("\\n" + "="*50)
-    print("🤖 Simple AI Chatbot Server Starting...")
-    print("📍 Open your browser to: http://localhost:5000")
-    print("💬 Start chatting with your AI!")
+    print("🤖 Streaming AI Chatbot Server Starting...")
+    print("📍 Open your browser to: http://localhost:8000")
+    print("💬 Watch responses stream in real-time!")
     print("="*50 + "\\n")
     
-    # Run the server
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Run the server on port 8000
+    app.run(host='0.0.0.0', port=8000, debug=False)
