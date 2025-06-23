@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple Flask Chatbot with Streaming Responses
-No documents, no ChromaDB - just pure chat with streaming
+Python 3.9 Compatible vLLM Chatbot
+Uses older vLLM API patterns to avoid Python 3.10+ features
 """
 
 import os
@@ -13,33 +13,48 @@ import logging
 os.environ["VLLM_DO_NOT_TRACK"] = "1"
 
 from flask import Flask, request, render_template_string, Response
-from vllm import LLM, SamplingParams
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize vLLM model
+# Initialize vLLM model with Python 3.9 compatible settings
 MODEL_PATH = "./Meta-Llama-3.1-8B-Instruct-AWQ-INT4"  # Update this path
 
-logger.info("Loading vLLM model...")
-llm = LLM(
-    model=MODEL_PATH,
-    quantization="awq",
-    dtype="float16",
-    max_model_len=4096,
-    gpu_memory_utilization=0.6
-)
+logger.info("Loading vLLM model with Python 3.9 compatibility...")
 
-# Sampling parameters
-sampling_params = SamplingParams(
-    temperature=0.7,
-    top_p=0.9,
-    max_tokens=512,
-    stop=["</s>", "<|im_end|>", "<|endoftext|>"]
-)
-
-logger.info("Model loaded successfully!")
+try:
+    from vllm import LLM, SamplingParams
+    
+    # Use more conservative settings to avoid newer vLLM features
+    llm = LLM(
+        model=MODEL_PATH,
+        quantization="awq",
+        dtype="float16",
+        max_model_len=2048,  # Smaller to be safer
+        gpu_memory_utilization=0.5,  # More conservative
+        trust_remote_code=True,
+        disable_custom_all_reduce=True,  # Disable newer features
+        enforce_eager=True,  # Use eager execution (older, more stable)
+        # disable_sliding_window=True,  # Disable if this option exists
+    )
+    
+    # Simple sampling parameters
+    sampling_params = SamplingParams(
+        temperature=0.7,
+        top_p=0.9,
+        max_tokens=256,  # Shorter responses to be safer
+        stop=["</s>", "<|im_end|>", "<|endoftext|>"]
+    )
+    
+    MODEL_LOADED = True
+    logger.info("Model loaded successfully!")
+    
+except Exception as e:
+    logger.error(f"Failed to load vLLM model: {e}")
+    MODEL_LOADED = False
+    llm = None
+    sampling_params = None
 
 def format_chat_prompt(user_message: str) -> str:
     """Format prompt for Llama 3.1 chat template"""
@@ -53,15 +68,41 @@ def format_chat_prompt(user_message: str) -> str:
 
 """
 
+def generate_response(user_message: str) -> str:
+    """Generate response with fallback for compatibility issues"""
+    if not MODEL_LOADED or llm is None:
+        return f"Model not loaded. Error during initialization. You asked: '{user_message}'"
+    
+    try:
+        # Format the prompt
+        formatted_prompt = format_chat_prompt(user_message)
+        
+        # Try the most basic generation approach
+        outputs = llm.generate(formatted_prompt, sampling_params)
+        
+        # Extract response safely
+        if outputs and len(outputs) > 0:
+            if hasattr(outputs[0], 'outputs') and len(outputs[0].outputs) > 0:
+                response = outputs[0].outputs[0].text.strip()
+                return response
+            else:
+                return "Error: Unexpected output format"
+        else:
+            return "Error: No output generated"
+            
+    except Exception as e:
+        logger.error(f"Error generating response: {e}")
+        return f"Error generating response: {str(e)}. You asked: '{user_message}'"
+
 # Flask web application
 app = Flask(__name__)
 
-# HTML template with Server-Sent Events for streaming
+# HTML template
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Streaming AI Chatbot</title>
+    <title>Python 3.9 vLLM Chatbot</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -127,14 +168,32 @@ HTML_TEMPLATE = '''
             text-align: center;
             color: #333;
         }
-        .typing {
-            opacity: 0.7;
-            font-style: italic;
+        .status {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <h1>🤖 Streaming AI Chatbot</h1>
+    <h1>🤖 Python 3.9 vLLM Chatbot</h1>
+    
+    <div class="status {{ 'error' if not model_loaded else '' }}">
+        {% if model_loaded %}
+        ✅ Model loaded successfully! Ready to chat.
+        {% else %}
+        ❌ Model failed to load. Check console for errors.
+        {% endif %}
+    </div>
     
     <div class="chat-container" id="chatContainer"></div>
     
@@ -223,7 +282,11 @@ HTML_TEMPLATE = '''
         
         // Add welcome message
         window.onload = function() {
-            addMessage('Hello! I\\'m ready to answer your questions. Ask me anything!', 'assistant');
+            if ({{ model_loaded | tojson }}) {
+                addMessage('Hello! I\\'m ready to answer your questions. How can I help you today?', 'assistant');
+            } else {
+                addMessage('Sorry, there was an error loading the model. Please check the console logs.', 'assistant');
+            }
             document.getElementById('messageInput').focus();
         };
     </script>
@@ -234,11 +297,11 @@ HTML_TEMPLATE = '''
 @app.route('/')
 def index():
     """Serve the chat interface"""
-    return render_template_string(HTML_TEMPLATE)
+    return render_template_string(HTML_TEMPLATE, model_loaded=MODEL_LOADED)
 
 @app.route('/stream')
 def stream():
-    """Stream the AI response using Server-Sent Events"""
+    """Stream the AI response"""
     user_message = request.args.get('message', '')
     
     if not user_message:
@@ -247,14 +310,10 @@ def stream():
     
     def generate():
         try:
-            logger.info(f"Streaming response for: {user_message}")
-            
-            # Format the prompt
-            formatted_prompt = format_chat_prompt(user_message)
+            logger.info(f"Generating response for: {user_message}")
             
             # Generate response
-            outputs = llm.generate([formatted_prompt], sampling_params)
-            response = outputs[0].outputs[0].text.strip()
+            response = generate_response(user_message)
             
             # Split response into words and stream them
             words = response.split()
@@ -282,13 +341,14 @@ def stream():
 @app.route('/health')
 def health():
     """Health check endpoint"""
-    return {"status": "healthy", "model": "loaded"}
+    return {"status": "healthy", "model_loaded": MODEL_LOADED, "python_version": "3.9"}
 
 if __name__ == '__main__':
     print("\\n" + "="*50)
-    print("🤖 Streaming AI Chatbot Server Starting...")
+    print("🐍 Python 3.9 Compatible vLLM Chatbot")
+    print(f"📊 Model loaded: {MODEL_LOADED}")
     print("📍 Open your browser to: http://localhost:8000")
-    print("💬 Watch responses stream in real-time!")
+    print("💬 Start chatting!")
     print("="*50 + "\\n")
     
     # Run the server on port 8000
