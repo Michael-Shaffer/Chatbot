@@ -34,8 +34,8 @@ def patch_sharded_checkpoint(model_path, output_path):
 
         for key, tensor in state_dict.items():
             new_key = key
-            # *** FIX: Do not rename the lm_head layer ***
-            if 'lm_head' in key:
+            # *** FIX: Do not rename lm_head or layernorm layers ***
+            if 'lm_head' in key or 'layernorm' in key:
                 new_state_dict[new_key] = tensor
                 continue
 
@@ -72,8 +72,8 @@ def patch_single_file_checkpoint(model_path, output_path):
 
     for key, tensor in state_dict.items():
         new_key = key
-        # *** FIX: Do not rename the lm_head layer ***
-        if 'lm_head' in key:
+        # *** FIX: Do not rename lm_head or layernorm layers ***
+        if 'lm_head' in key or 'layernorm' in key:
             new_state_dict[new_key] = tensor
             continue
 
@@ -166,5 +166,5 @@ if __name__ == "__main__":
         required=True,
         help="Path to the directory where the patched model will be saved."
     )
-    args = parser.parse_args()
-    patch_checkpoint(args.model_path, args.output_path)
+args = parser.parse_args()
+patch_checkpoint(args.model_path, args.output_path)
