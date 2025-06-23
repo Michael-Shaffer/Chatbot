@@ -1,0 +1,239 @@
+accelerate==0.33.0
+aioboto3==13.1.1
+aiobotocore==2.13.1
+aiofiles==24.1.0
+aiohttp==3.9.5
+aioitertools==0.11.0
+aiosignal==1.3.1
+airportsdata==20250523
+annotated-types==0.7.0
+anyio==4.4.0
+astor==0.8.1
+async-timeout==4.0.3
+attrs==23.2.0
+bitsandbytes @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/bitsandbytes-0.46.0-py3-none-manylinux_2_24_x86_64.whl#sha256=ef38883cfd26f36a0dfff1715f620f87cee3813431f33e10e9658205160cb89b
+blake3==1.0.5
+blinker @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/blinker-1.9.0-py3-none-any.whl#sha256=ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc
+boto3==1.34.131
+botocore==1.34.131
+cachetools==6.0.0
+certifi==2024.7.4
+cffi @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/cffi-1.17.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=cdf5ce3acdfd1661132f2a9c19cac174758dc2352bfe37d98aa7512c6b7178b3
+charset-normalizer @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/charset_normalizer-3.4.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=82d8fd25b7f4675d0c47cf95b594d4e7b158aca33b76aa63d07186e13c0e0ab7
+chromadb @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/chromadb-1.0.12-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=ff82c806846301bb8ffbddd04abeb2413b13d1a1e7b1bb4328dd831ad01f1b1d
+ci-info==0.3.0
+click==8.1.7
+cloudpickle==3.1.1
+cmake==4.0.2
+compressed-tensors==0.10.1
+configobj==5.0.8
+configparser==7.0.0
+cryptography @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/cryptography-45.0.3-cp37-abi3-manylinux_2_34_x86_64.whl#sha256=57a6500d459e8035e813bd8b51b671977fb149a8c95ed814989da682314d0782
+cupy-cuda12x==13.4.1
+dataclasses-json==0.6.7
+Deprecated==1.2.18
+depyf==0.18.0
+dill==0.3.8
+diskcache==5.6.3
+distro==1.9.0
+dnspython==2.7.0
+einops==0.8.1
+email_validator==2.2.0
+etelemetry==0.3.1
+exceptiongroup==1.2.2
+faiss-cpu==1.8.0.post1
+faiss-gpu==1.7.2
+fastapi==0.115.12
+fastapi-cli==0.0.7
+fastrlock==0.6
+filelock==3.18.0
+fitz==0.0.1.dev2
+Flask @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/flask-3.1.1-py3-none-any.whl#sha256=07aae2bb5eaf77993ef57e357491839f5fd9f4dc281593a81a9e4d79a24f295c
+fpdf==1.7.2
+frontend==0.0.3
+frozenlist==1.4.1
+fsspec==2024.6.1
+genson==1.3.0
+gguf==0.17.0
+git-lfs==1.6
+googleapis-common-protos==1.70.0
+greenlet==3.0.3
+grpcio==1.73.0
+h11==0.16.0
+hf-xet==1.1.3
+httpcore==1.0.9
+httplib2==0.22.0
+httptools==0.6.4
+httpx==0.28.1
+huggingface-hub==0.32.4
+humbug==0.3.2
+idna==3.7
+importlib_metadata==8.0.0
+interegular==0.3.3
+iso3166==2.1.1
+isodate==0.6.1
+itsdangerous==2.2.0
+Jinja2==3.1.6
+jiter==0.10.0
+jmespath==1.0.1
+joblib==1.4.2
+jsonpatch==1.33
+jsonpointer==3.0.0
+jsonschema @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/jsonschema-4.24.0-py3-none-any.whl#sha256=a462455f19f5faf404a7902952b6f0e3ce868f3ee09a359b05eca6673bd8412d
+jsonschema-specifications==2025.4.1
+langchain==0.2.11
+langchain-community @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/langchain_community-0.3.24-py3-none-any.whl#sha256=b6cdb376bf1c2f4d2503aca20f8f35f2d5b3d879c52848277f20ce1950e7afaf
+langchain-core @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/langchain_core-0.3.64-py3-none-any.whl#sha256=e844c425329d450cb3010001d86b61fd59a6a17691641109bae39322c85e27dd
+langchain-huggingface @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/langchain_huggingface-0.3.0-py3-none-any.whl#sha256=aab85d57e649c805d2f2a9f8d72d87b5d12c45dd4831309ac9c37753ddb237ed
+langchain-text-splitters==0.2.2
+langsmith==0.1.94
+lark==1.2.2
+libdeeplake==0.0.138
+llama_cpp_python==0.2.84
+llguidance==0.7.29
+llvmlite==0.43.0
+lm-format-enforcer==0.10.11
+looseversion==1.3.0
+lxml==5.3.0
+lz4==4.3.3
+markdown-it-py==3.0.0
+MarkupSafe==2.1.5
+marshmallow==3.21.3
+maturin @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/maturin-1.8.6-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.musllinux_1_1_x86_64.whl#sha256=bec5948c6475954c8089b17fae349966258756bb2ca05e54099e476a08070795
+mdurl==0.1.2
+mistral_common==1.6.0
+mpmath==1.3.0
+msgpack==1.1.0
+msgspec==0.19.0
+multidict==6.0.5
+multiprocess==0.70.16
+mypy-extensions==1.0.0
+nest-asyncio==1.6.0
+networkx==3.2.1
+nibabel==5.2.1
+ninja==1.11.1.4
+nipype==1.8.6
+nougat-ocr @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/nougat_ocr-0.1.17-py3-none-any.whl#sha256=f776732c716250972c7de11a47b36e94fa48e271d67045a427f19f12eeeef118
+numba==0.60.0
+numpy==1.26.4
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.77
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.5.1.17
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.6.3
+nvidia-ml-py==12.575.51
+nvidia-nccl-cu12==2.26.2
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvtx-cu12==12.6.77
+openai==1.85.0
+opencv-python-headless==4.11.0.86
+opentelemetry-api==1.26.0
+opentelemetry-exporter-otlp==1.26.0
+opentelemetry-exporter-otlp-proto-common==1.26.0
+opentelemetry-exporter-otlp-proto-grpc==1.26.0
+opentelemetry-exporter-otlp-proto-http==1.26.0
+opentelemetry-proto==1.26.0
+opentelemetry-sdk==1.26.0
+opentelemetry-semantic-conventions==0.47b0
+opentelemetry-semantic-conventions-ai==0.4.9
+orjson==3.10.6
+outlines==0.1.11
+outlines_core==0.1.26
+overrides @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/overrides-7.7.0-py3-none-any.whl#sha256=c7ed9d062f78b8e4c1a7b70bd8796b35ead4d9f510227ef9c5dc7626c60d7e49
+packaging==24.1
+pandas==2.2.2
+partial-json-parser==0.2.1.1.post5
+pathlib==1.0.1
+pathos==0.3.2
+pathspec==0.12.1
+pdfminer.six @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/pdfminer_six-20250506-py3-none-any.whl#sha256=d81ad173f62e5f841b53a8ba63af1a4a355933cfc0ffabd608e568b9193909e3
+pdfplumber @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/pdfplumber-0.11.6-py3-none-any.whl#sha256=169fc2b8dbf328c81a4e9bab30af0c304ad4b472fd7816616eabdb79dc5d9d17
+pillow==11.2.1
+pox==0.3.4
+ppft==1.7.6.8
+prometheus-fastapi-instrumentator==7.1.0
+prometheus_client==0.22.1
+protobuf==4.25.8
+prov==2.0.1
+psutil==6.0.0
+py-cpuinfo==9.0.0
+pycountry==24.6.1
+pycparser @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/pycparser-2.22-py3-none-any.whl#sha256=c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
+pydantic @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/pydantic-2.11.5-py3-none-any.whl#sha256=f9c26ba06f9747749ca1e5c94d6a85cb84254577553c8785576fd38fa64dc0f7
+pydantic_core==2.33.2
+pydot==3.0.1
+Pygments==2.19.1
+PyJWT==2.8.0
+PyMuPDF==1.25.1
+pymupdf4llm==0.0.17
+PyMuPDFb==1.24.9
+pyparsing==3.1.2
+pypdf==4.3.1
+python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
+python-json-logger==3.3.0
+python-multipart==0.0.20
+pytz==2024.1
+pyxnat==1.6.2
+PyYAML==6.0.1
+pyzmq==26.4.0
+ray==2.46.0
+rdflib==6.3.2
+referencing @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/referencing-0.36.2-py3-none-any.whl#sha256=e8699adbbf8b5c7de96d8ffa0eb5c158b3beafce084968e2ea8bb08c6794dcd0
+regex==2024.7.24
+requests @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/requests-2.32.4-py3-none-any.whl#sha256=27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c
+rich==14.0.0
+rich-toolkit==0.14.7
+rpds-py==0.25.1
+s3transfer==0.10.2
+safetensors==0.4.3
+scikit-learn==1.5.1
+scikit_build_core==0.9.9
+scipy==1.13.1
+sentence-transformers==3.0.1
+sentencepiece==0.2.0
+shellingham==1.5.4
+simplejson==3.19.2
+six==1.16.0
+sniffio==1.3.1
+SQLAlchemy==2.0.31
+starlette==0.46.2
+sympy==1.14.0
+tabulate @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/backend/test/tabulate-0.9.0-py3-none-any.whl#sha256=024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f
+tenacity==8.5.0
+threadpoolctl==3.5.0
+tiktoken==0.9.0
+tokenizers==0.21.1
+tomli==2.0.1
+torch==2.7.0
+torchaudio==2.7.0
+torchvision==0.22.0
+tqdm==4.66.4
+traits==6.3.2
+transformers==4.52.4
+triton==3.3.0
+typer==0.16.0
+typing-inspect==0.9.0
+typing-inspection @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/typing_inspection-0.4.1-py3-none-any.whl#sha256=389055682238f53b04f7badcb49b989835495a96700ced5dab2d8feae4b26f51
+typing_extensions==4.12.2
+tzdata==2024.1
+urllib3==1.26.19
+uvicorn==0.30.6
+uvloop==0.21.0
+vllm==0.9.1
+vllm-flash-attn==2.5.9
+watchfiles==1.0.5
+websockets==15.0.1
+Werkzeug @ file:///net/172.20.48.38/export/git_repos_big2/shaffem/polaris/src/werkzeug-3.1.3-py3-none-any.whl#sha256=54b78bf3716d19a65be4fceccc0d1d7b89e608834989dfae50ea87564639213e
+wrapt==1.16.0
+xformers==0.0.30
+xgrammar==0.1.19
+yarl==1.9.4
+zipp==3.23.0
+
