@@ -246,6 +246,7 @@ HTML_TEMPLATE = '''
                     function readStream() {
                         return reader.read().then(({ done, value }) => {
                             if (done) {
+                                console.log('Stream finished');
                                 isGenerating = false;
                                 sendButton.disabled = false;
                                 sendButton.textContent = 'Send';
@@ -255,17 +256,27 @@ HTML_TEMPLATE = '''
                             
                             // Decode the chunk
                             const chunk = decoder.decode(value, { stream: true });
+                            console.log('Received chunk:', chunk);
+                            
                             const lines = chunk.split('\\n');
+                            console.log('Split into lines:', lines);
                             
                             for (const line of lines) {
                                 if (line.startsWith('data: ')) {
+                                    console.log('Processing data line:', line);
                                     try {
-                                        const data = JSON.parse(line.slice(6));
+                                        const jsonData = line.slice(6);
+                                        console.log('JSON data:', jsonData);
+                                        const data = JSON.parse(jsonData);
+                                        console.log('Parsed data:', data);
                                         
                                         if (data.token) {
+                                            console.log('Adding token to div:', data.token);
                                             currentAssistantDiv.textContent += data.token;
+                                            console.log('Current div text:', currentAssistantDiv.textContent);
                                             scrollToBottom();
                                         } else if (data.done) {
+                                            console.log('Received done signal');
                                             isGenerating = false;
                                             sendButton.disabled = false;
                                             sendButton.textContent = 'Send';
@@ -273,7 +284,7 @@ HTML_TEMPLATE = '''
                                             return;
                                         }
                                     } catch (e) {
-                                        console.log('Skipping malformed JSON:', line);
+                                        console.error('JSON parse error:', e, 'Line:', line);
                                     }
                                 }
                             }
