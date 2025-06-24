@@ -22,26 +22,30 @@ from vllm import LLM, SamplingParams
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize vLLM
+# Initialize vLLM (only load once)
 MODEL_PATH = "./Meta-Llama-3.1-8B-Instruct-AWQ-INT4"
 
-logger.info("Loading vLLM model...")
-llm = LLM(
-    model=MODEL_PATH,
-    quantization="awq",
-    dtype="float16",
-    max_model_len=2048,
-    gpu_memory_utilization=0.5
-)
+# Prevent double loading in Flask debug mode
+if 'llm' not in globals():
+    logger.info("Loading vLLM model...")
+    llm = LLM(
+        model=MODEL_PATH,
+        quantization="awq",
+        dtype="float16",
+        max_model_len=2048,
+        gpu_memory_utilization=0.5
+    )
 
-sampling_params = SamplingParams(
-    temperature=0.7,
-    top_p=0.9,
-    max_tokens=256,
-    stop=["</s>", "<|im_end|>", "<|endoftext|>"]
-)
+    sampling_params = SamplingParams(
+        temperature=0.7,
+        top_p=0.9,
+        max_tokens=256,
+        stop=["</s>", "<|im_end|>", "<|endoftext|>"]
+    )
 
-logger.info("Model loaded successfully!")
+    logger.info("Model loaded successfully!")
+else:
+    logger.info("Model already loaded, skipping...")
 
 def format_chat_prompt(user_message: str) -> str:
     """Format prompt for Llama 3.1 chat template"""
@@ -218,7 +222,25 @@ HTML_TEMPLATE = '''
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({message: message})
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error('Response is not JSON:', contentType);
+                    return response.text().then(text => {
+                        console.error('Response text:', text);
+                        throw new Error('Server returned non-JSON response');
+                    });
+                }
+                
+                return response.json();
+            })
             .then(data => {
                 if (data.response) {
                     addMessage(data.response, 'assistant');
@@ -265,29 +287,46 @@ def index():
 def debug_chat():
     """Debug endpoint to see exactly what's happening"""
     try:
-        data = request.json
+        # Get the request data safely
+        if not request.is_json:
+            logger.error("Request is not JSON")
+            return jsonify({'error': 'Request must be JSON'}), 400
+            
+        data = request.get_json()
+        if not data:
+            logger.error("No JSON data received")
+            return jsonify({'error': 'No JSON data'}), 400
+            
         user_message = data.get('message', '')
         
         if not user_message:
-            return jsonify({'error': 'No message provided'})
+            logger.error("No message in request")
+            return jsonify({'error': 'No message provided'}), 400
         
-        logger.info(f"\\n{'='*50}")
+        logger.info(f"\n{'='*50}")
         logger.info(f"DEBUG CHAT REQUEST: {user_message}")
         logger.info(f"{'='*50}")
+        
+        # Check if model is loaded
+        if 'llm' not in globals() or llm is None:
+            logger.error("Model not loaded")
+            return jsonify({'error': 'Model not loaded'}), 500
         
         # Generate response with debugging
         response = debug_generate_response(user_message)
         
-        logger.info(f"\\n{'='*50}")
+        logger.info(f"\n{'='*50}")
         logger.info(f"FINAL RESPONSE: '{response}'")
         logger.info(f"RESPONSE LENGTH: {len(response)}")
-        logger.info(f"{'='*50}\\n")
+        logger.info(f"{'='*50}\n")
         
-        return jsonify({'response': response})
+        # Ensure we return valid JSON
+        return jsonify({'response': response, 'status': 'success'})
         
     except Exception as e:
         logger.error(f"Error in debug_chat: {e}", exc_info=True)
-        return jsonify({'error': f'Debug chat error: {str(e)}'})
+        # Return JSON error instead of letting Flask return HTML
+        return jsonify({'error': f'Debug chat error: {str(e)}', 'status': 'error'}), 500
 
 @app.route('/health')
 def health():
@@ -300,4 +339,4 @@ if __name__ == '__main__':
     print("📊 Check console logs for detailed debugging info")
     print("="*50 + "\\n")
     
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=False)  # Changed to debug=False
