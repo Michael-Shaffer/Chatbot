@@ -220,39 +220,70 @@ HTML_TEMPLATE = '''
             // Create assistant message div for streaming
             const currentAssistantDiv = addMessage('', 'assistant');
             
-            // Use Server-Sent Events for streaming
-            const eventSource = new EventSource('/stream?message=' + encodeURIComponent(message));
-            
-            eventSource.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                
-                if (data.token) {
-                    // Add token to current message
-                    currentAssistantDiv.textContent += data.token;
-                    scrollToBottom();
-                } else if (data.done) {
-                    // Streaming finished
-                    eventSource.close();
+            // Use fetch with streaming instead of EventSource (more reliable)
+            fetch('/stream?message=' + encodeURIComponent(message))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    function readStream() {
+                        return reader.read().then(({ done, value }) => {
+                            if (done) {
+                                isGenerating = false;
+                                sendButton.disabled = false;
+                                sendButton.textContent = 'Send';
+                                input.focus();
+                                return;
+                            }
+                            
+                            // Decode the chunk
+                            const chunk = decoder.decode(value, { stream: true });
+                            const lines = chunk.split('\\n');
+                            
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    try {
+                                        const data = JSON.parse(line.slice(6));
+                                        
+                                        if (data.token) {
+                                            currentAssistantDiv.textContent += data.token;
+                                            scrollToBottom();
+                                        } else if (data.done) {
+                                            isGenerating = false;
+                                            sendButton.disabled = false;
+                                            sendButton.textContent = 'Send';
+                                            input.focus();
+                                            return;
+                                        }
+                                    } catch (e) {
+                                        console.log('Skipping malformed JSON:', line);
+                                    }
+                                }
+                            }
+                            
+                            // Continue reading
+                            return readStream();
+                        });
+                    }
+                    
+                    return readStream();
+                })
+                .catch(error => {
+                    console.error('Fetch streaming error:', error);
+                    
+                    if (currentAssistantDiv && currentAssistantDiv.textContent === '') {
+                        currentAssistantDiv.textContent = 'Error: ' + error.message;
+                    }
+                    
                     isGenerating = false;
                     sendButton.disabled = false;
                     sendButton.textContent = 'Send';
                     input.focus();
-                }
-            };
-            
-            eventSource.onerror = function(event) {
-                console.error('EventSource failed:', event);
-                eventSource.close();
-                
-                if (currentAssistantDiv && currentAssistantDiv.textContent === '') {
-                    currentAssistantDiv.textContent = 'Error: Could not get response';
-                }
-                
-                isGenerating = false;
-                sendButton.disabled = false;
-                sendButton.textContent = 'Send';
-                input.focus();
-            };
+                });
         }
         
         function addMessage(text, sender) {
