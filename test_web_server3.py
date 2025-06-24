@@ -79,7 +79,10 @@ def debug_generate_response(user_message: str) -> str:
         if outputs and len(outputs) > 0:
             output = outputs[0]
             logger.info(f"Type of output[0]: {type(output)}")
-            logger.info(f"Output[0] attributes: {dir(output)}")
+            
+            # Print ALL attributes to see what's available
+            output_attrs = [attr for attr in dir(output) if not attr.startswith('_')]
+            logger.info(f"Output attributes: {output_attrs}")
             
             if hasattr(output, 'outputs'):
                 logger.info(f"output.outputs type: {type(output.outputs)}")
@@ -88,27 +91,37 @@ def debug_generate_response(user_message: str) -> str:
                 if len(output.outputs) > 0:
                     completion = output.outputs[0]
                     logger.info(f"Type of completion: {type(completion)}")
-                    logger.info(f"Completion attributes: {dir(completion)}")
                     
+                    # Print ALL completion attributes
+                    completion_attrs = [attr for attr in dir(completion) if not attr.startswith('_')]
+                    logger.info(f"Completion attributes: {completion_attrs}")
+                    
+                    # Try different possible text attributes
+                    for attr in ['text', 'generated_text', 'output', 'content']:
+                        if hasattr(completion, attr):
+                            value = getattr(completion, attr)
+                            logger.info(f"completion.{attr}: '{value}' (type: {type(value)})")
+                    
+                    # Return whatever text we can find
                     if hasattr(completion, 'text'):
-                        response_text = completion.text
-                        logger.info(f"Raw response text: '{response_text}'")
-                        logger.info(f"Response text length: {len(response_text)}")
-                        
-                        stripped_response = response_text.strip()
-                        logger.info(f"Stripped response: '{stripped_response}'")
-                        return stripped_response
+                        response_text = completion.text.strip()
+                        logger.info(f"Using completion.text: '{response_text}'")
+                        return response_text if response_text else "Empty response from model"
                     else:
-                        logger.error("completion object has no 'text' attribute")
-                        return f"DEBUG: completion has no text. Attributes: {dir(completion)}"
+                        # Try to find any text-like attribute
+                        for attr in completion_attrs:
+                            if 'text' in attr.lower():
+                                value = getattr(completion, attr)
+                                if isinstance(value, str) and value.strip():
+                                    logger.info(f"Using {attr}: '{value}'")
+                                    return value.strip()
+                        
+                        return f"DEBUG: No text found. Completion has: {completion_attrs}"
                 else:
-                    logger.error("output.outputs is empty")
                     return "DEBUG: output.outputs is empty"
             else:
-                logger.error("output has no 'outputs' attribute")
-                return f"DEBUG: output has no outputs. Attributes: {dir(output)}"
+                return f"DEBUG: output has no outputs. Available: {output_attrs}"
         else:
-            logger.error("outputs is empty or None")
             return "DEBUG: No outputs generated"
             
     except Exception as e:
