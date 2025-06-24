@@ -372,12 +372,16 @@ def stream():
                 logger.info(f"STREAMING: Sending token {i}: '{token}'")
                 
                 # Send each word with a small delay for streaming effect
-                yield f"data: {json.dumps({'token': token})}\\n\\n"
+                data_line = f"data: {json.dumps({'token': token})}\\n\\n"
+                logger.info(f"STREAMING: Yielding: {repr(data_line)}")
+                yield data_line
                 time.sleep(0.05)  # Small delay between words
             
             # Signal completion
             logger.info("STREAMING: Sending done signal")
-            yield f"data: {json.dumps({'done': True})}\\n\\n"
+            done_line = f"data: {json.dumps({'done': True})}\\n\\n"
+            logger.info(f"STREAMING: Done line: {repr(done_line)}")
+            yield done_line
             
         except Exception as e:
             logger.error(f"STREAMING: Error: {e}", exc_info=True)
