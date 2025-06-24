@@ -333,13 +333,24 @@ def stream():
     
     def generate():
         try:
-            logger.info(f"Streaming response for: {user_message}")
+            logger.info(f"STREAMING: Starting for message: {user_message}")
             
             # Generate the full response first (since vLLM doesn't stream natively)
             response = debug_generate_response(user_message)
             
+            logger.info(f"STREAMING: Got response: '{response}'")
+            logger.info(f"STREAMING: Response length: {len(response)}")
+            logger.info(f"STREAMING: Response type: {type(response)}")
+            
+            if not response or response.strip() == "":
+                logger.error("STREAMING: Response is empty!")
+                yield f"data: {json.dumps({'token': 'Error: Empty response from model'})}\\n\\n"
+                yield f"data: {json.dumps({'done': True})}\\n\\n"
+                return
+            
             # Split response into words and stream them
             words = response.split()
+            logger.info(f"STREAMING: Split into {len(words)} words: {words}")
             
             for i, word in enumerate(words):
                 if i == 0:
@@ -347,16 +358,19 @@ def stream():
                 else:
                     token = " " + word
                 
+                logger.info(f"STREAMING: Sending token {i}: '{token}'")
+                
                 # Send each word with a small delay for streaming effect
                 yield f"data: {json.dumps({'token': token})}\\n\\n"
                 time.sleep(0.05)  # Small delay between words
             
             # Signal completion
+            logger.info("STREAMING: Sending done signal")
             yield f"data: {json.dumps({'done': True})}\\n\\n"
             
         except Exception as e:
-            logger.error(f"Error in streaming: {e}")
-            yield f"data: {json.dumps({'token': f'Error: {str(e)}'})}\\n\\n"
+            logger.error(f"STREAMING: Error: {e}", exc_info=True)
+            yield f"data: {json.dumps({'token': f'Streaming Error: {str(e)}'})}\\n\\n"
             yield f"data: {json.dumps({'done': True})}\\n\\n"
     
     return Response(generate(), mimetype='text/plain')
