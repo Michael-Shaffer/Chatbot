@@ -1,0 +1,48 @@
+// In chat/script.js
+
+// --- Function that fetches and processes the stream from the server ---
+async function getBotResponse(query) {
+    // Create a placeholder for the bot's response
+    // IMPORTANT: This now returns the main container, not the <p> tag
+    const botMessageContainer = addMessageToChat('', 'bot'); 
+
+    let fullBotResponse = ''; // Variable to accumulate the full response text
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: query }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+            
+            // Append the new chunk to our full response string
+            const chunk = decoder.decode(value);
+            fullBotResponse += chunk;
+
+            // Convert the accumulated Markdown to HTML and set it
+            // The 'marked.parse()' function comes from the library we added
+            botMessageContainer.innerHTML = marked.parse(fullBotResponse); 
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+    } catch (error) {
+        console.error('Error fetching bot response:', error);
+        botMessageContainer.innerHTML = '<strong>Bot:</strong> Sorry, an error occurred.';
+    }
+}
