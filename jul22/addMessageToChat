@@ -1,0 +1,21 @@
+// In chat/script.js
+
+// --- Make this small change to your addMessageToChat function ---
+function addMessageToChat(text, sender) {
+    const messageContainer = document.createElement('div');
+    messageContainer.classList.add('message', `${sender}-message`);
+
+    // For the initial user message, parse it as Markdown too
+    if (text) {
+        messageContainer.innerHTML = marked.parse(`<strong>${sender === 'user' ? 'You' : 'Bot'}:</strong> ${text}`);
+    } else {
+        // For the bot's empty placeholder
+        messageContainer.innerHTML = `<strong>Bot:</strong> `;
+    }
+
+    chatMessages.appendChild(messageContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Return the main container div
+    return messageContainer;
+}
