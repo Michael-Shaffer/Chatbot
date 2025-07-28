@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaris Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="lib/highlight.js/styles/tokyo-night-dark.css">
+    <script src="lib/highlight.js/highlight.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="home-link">Polaris</a>
+            </div>
+            <h2>Documents</h2>
+            <div class="document-list" id="document-list">
+                <div class="document-item">4428</div>
+                <div class="document-item">4489</div>
+                <div class="document-item">J409</div>
+            </div>
+        </aside>
+        <main class="chat-interface">
+            <div id="chat-messages">
+                <div class="welcome-container">
+                    <svg class="polaris-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <h1 class="welcome-title">Hello, I'm <span class="gradient-text">Polaris</span></h1>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <form class="chat-input-form" id="chat-form">
+                <div class="message-input-wrapper">
+                    <textarea 
+                        id="message-input" 
+                        placeholder="Ask anything about the 409..." 
+                        autocomplete="off"
+                        rows="1"
+                    ></textarea>
+                    <div class="send-button-container">
+                        <button type="submit" title="Send Message">
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
+                               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>hljs.highlightAll();</script>
+    <script src="script.js"></script>
+</body>
+</html>
