@@ -172,8 +172,9 @@ body {
     height: 8px;
     background-color: #fff;
     border-radius: 50%;
-    box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #f0f0f0;
-    animation: glow 4s ease-in-out infinite alternate;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff; /* Simplified static shadow */
+    animation: performant-glow 4s ease-in-out infinite alternate; /* The new animation */
+    will-change: transform, opacity; /* Tell the browser to optimize this element */
 }
 
 @keyframes performant-glow {
