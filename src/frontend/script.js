@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const sky = document.querySelector('.sky');
     const starContainers = document.querySelectorAll('.star-container');
     const proximityThreshold = 75;
 
@@ -20,4 +19,19 @@ document.addEventListener('DOMContentLoaded', () => {
     cacheStarPositions();
     // Recalculate if the window is resized
     window.addEventListener('resize', cacheStarPositions);
+
+
+    // This event listener now ONLY handles showing star labels
+    document.addEventListener('mousemove', (e) => {
+        // Proximity detection for star labels
+        starPositions.forEach(star => {
+            if (!star.label) return;
+            const distance = Math.sqrt(Math.pow(e.clientX - star.x, 2) + Math.pow(e.clientY - star.y, 2));
+            if (distance < proximityThreshold) {
+                star.label.style.opacity = 1;
+            } else {
+                star.label.style.opacity = 0;
+            }
+        });
+    });
 });
