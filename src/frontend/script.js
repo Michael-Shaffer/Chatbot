@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const starContainers = document.querySelectorAll('.star-container');
     const proximityThreshold = 75;
 
-    // --- OPTIMIZATION 1: Store star positions so we don't recalculate them constantly ---
+    // Store star positions so we don't recalculate them constantly
     let starPositions = [];
     function cacheStarPositions() {
         starPositions = []; // Clear cache before recalculating
@@ -22,16 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', cacheStarPositions);
 
 
-    // --- OPTIMIZATION 2: "Throttle" the mousemove event to limit how often it runs ---
-    let canRun = true;
+    // This event listener now runs instantly on every mouse move
     document.addEventListener('mousemove', (e) => {
-        if (!canRun) return; // Exit if we're in the cooldown period
-        canRun = false;
-        setTimeout(() => {
-            canRun = true;
-        }, 100); // Only run this code every 100ms
-
-        // --- OPTIMIZATION 3: Combined the two old mousemove functions into one ---
         // Parallax effect
         const mouseX = e.clientX / window.innerWidth - 0.5;
         const mouseY = e.clientY / window.innerHeight - 0.5;
@@ -40,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const skyY = -mouseY * parallaxFactor;
         sky.style.transform = `translate(${skyX}px, ${skyY}px)`;
 
-        // Proximity detection (now using the cached positions)
+        // Proximity detection (using the cached positions)
         starPositions.forEach(star => {
             if (!star.label) return;
             const distance = Math.sqrt(Math.pow(e.clientX - star.x, 2) + Math.pow(e.clientY - star.y, 2));
