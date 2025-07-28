@@ -176,9 +176,15 @@ body {
     animation: glow 4s ease-in-out infinite alternate;
 }
 
-@keyframes glow {
-    from { box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #f0f0f0; }
-    to { box-shadow: 0 0 15px #fff, 0 0 25px #fff, 0 0 35px #fff, 0 0 50px #f0f0f0; }
+@keyframes performant-glow {
+    from {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+    to {
+        transform: scale(1.2);
+        opacity: 1;
+    }
 }
 
 
