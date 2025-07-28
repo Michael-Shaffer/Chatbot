@@ -1,59 +1,127 @@
-// Auto-resize textarea functionality
-function autoResize(textarea) {
-    const wrapper = textarea.closest('.message-input-wrapper');
-    textarea.style.height = 'auto';
-    const newHeight = Math.min(textarea.scrollHeight, 120);
-    textarea.style.height = newHeight + 'px';
+document.addEventListener('DOMContentLoaded', () => {
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const chatMessages = document.getElementById('chat-messages');
     
-    // Toggle overflow and alignment based on content
-    if (textarea.scrollHeight > 120) {
-        textarea.style.overflowY = 'auto';
-        wrapper.style.alignItems = 'flex-end';
-    } else if (newHeight > 30) {
-        textarea.style.overflowY = 'hidden';
-        wrapper.style.alignItems = 'flex-end';
-    } else {
-        textarea.style.overflowY = 'hidden';
-        wrapper.style.alignItems = 'center';
+    let chatHistory = [];
+
+    // Auto-resize textarea functionality
+    function autoResize(textarea) {
+        const wrapper = textarea.closest('.message-input-wrapper');
+        textarea.style.height = 'auto';
+        const newHeight = Math.min(textarea.scrollHeight, 120);
+        textarea.style.height = newHeight + 'px';
+        
+        // Toggle overflow and alignment based on content
+        if (textarea.scrollHeight > 120) {
+            textarea.style.overflowY = 'auto';
+            wrapper.style.alignItems = 'flex-end';
+        } else if (newHeight > 30) {
+            textarea.style.overflowY = 'hidden';
+            wrapper.style.alignItems = 'flex-end';
+        } else {
+            textarea.style.overflowY = 'hidden';
+            wrapper.style.alignItems = 'center';
+        }
     }
-}
 
-// Get the message input element
-const messageInput = document.getElementById('message-input');
+    // Auto-resize on input
+    messageInput.addEventListener('input', function() {
+        autoResize(this);
+    });
 
-// Auto-resize on input
-messageInput.addEventListener('input', function() {
-    autoResize(this);
-});
+    // Handle Enter key (send) vs Shift+Enter (new line)
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
 
-// Handle Enter key (send) vs Shift+Enter (new line)
-messageInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    chatForm.addEventListener('submit', handleFormSubmit);
+
+    async function handleFormSubmit(e) {
         e.preventDefault();
-        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
-    }
-});
+        const messageText = messageInput.value.trim();
+        if (!messageText) return;
 
-// Update your existing form submit handler
-document.getElementById('chat-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (messageInput.value.trim()) {
-        // Your existing message sending logic here
-        const message = messageInput.value.trim();
-        
-        // Send the message (your existing code)
-        // ...
-        
-        // Clear the input and reset height
+        // Clear input and reset height
         messageInput.value = '';
         autoResize(messageInput);
-        
-        // Visual feedback
-        const button = this.querySelector('button');
-        button.style.animation = 'sendPulse 0.3s ease-in-out';
+
+        // Visual feedback for send button
+        const sendButton = chatForm.querySelector('button[type="submit"]');
+        sendButton.style.animation = 'sendPulse 0.3s ease-in-out';
         setTimeout(() => {
-            button.style.animation = '';
+            sendButton.style.animation = '';
         }, 300);
+
+        chatHistory.push({ role: 'user', content: messageText });
+        
+        addMessageToChat(messageText, 'user');
+
+        await getBotResponse(chatHistory);
+    }
+
+    function addMessageToChat(text, sender) {
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message', `${sender}-message`);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+
+        if (text) {
+            contentDiv.innerHTML = text;
+        }
+
+        messageContainer.appendChild(contentDiv);
+        chatMessages.appendChild(messageContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        return contentDiv;
+    }
+
+    async function getBotResponse(currentChatHistory) {
+        const botContentElement = addMessageToChat('', 'bot');
+        
+        let fullBotResponse = '';
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: currentChatHistory })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                throw new Error(`Network response was not ok: ${response.status} - ${errorData.message || response.statusText}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                fullBotResponse += chunk;
+                
+                botContentElement.innerHTML = marked.parse(fullBotResponse);
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            botContentElement.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+
+            chatHistory.push({ role: 'assistant', content: fullBotResponse });
+            
+        } catch (error) {
+            console.error('Error fetching bot response:', error);
+            botContentElement.innerHTML = 'Sorry, an error occurred: ' + error.message;
+        }
     }
 });
