@@ -1,66 +1,118 @@
+/* Chat input form */
 .chat-input-form {
-    max-width: 960px; 
-    width: 100%; 
-    margin-left: auto; 
-    margin-right: auto;
-    display: flex;
-    align-items: center;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
     padding: 1.5rem 2rem 2rem;
 }
 
-.message-input-wrapper { 
-    flex-grow: 1; 
-    position: relative;
+/* Unified wrapper for input and button */
+.message-input-wrapper {
     display: flex;
     align-items: center;
     background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-primary); 
+    border: 1px solid var(--border-primary);
     border-radius: 12px;
-    padding: 0.9rem 1.1rem;
-    gap: 0.75rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    padding: 0.625rem 0.625rem 0.625rem 1.25rem;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
+/* Focus state for the wrapper */
 .message-input-wrapper:focus-within {
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px var(--accent-primary-muted);
 }
 
+/* Text input styling */
 #message-input {
     flex: 1;
     background: transparent;
     border: none;
     outline: none;
-    padding: 0;
-    color: var(--text-primary); 
-    font-size: 1rem; 
+    padding: 0 0.75rem 0 0;
+    color: var(--text-primary);
+    font-size: 1rem;
     font-family: var(--font-family-sans);
+    line-height: 1.5;
+    min-width: 0;
+    resize: none;
+    overflow-y: hidden;
+    min-height: 1.5rem;
+    max-height: 120px;
+    transition: height 0.1s ease;
+    display: block;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-primary) transparent;
 }
 
-#message-input::placeholder { 
-    color: var(--text-secondary); 
-    opacity: 0.8; 
+/* Webkit scrollbar styling */
+#message-input::-webkit-scrollbar {
+    width: 6px;
 }
 
+#message-input::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#message-input::-webkit-scrollbar-thumb {
+    background-color: var(--border-primary);
+    border-radius: 3px;
+}
+
+#message-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+/* Send button container */
 .send-button-container {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Send button styling */
+.send-button-container button {
+    height: 36px;
+    width: 36px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    background: var(--accent-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
     flex-shrink: 0;
 }
 
-.send-button-container button {
-    height: 40px; 
-    width: 40px; 
-    border: none; 
-    border-radius: 50%;
-    cursor: pointer; 
-    background: var(--accent-primary); 
-    color: #171A21;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    transition: background-color 0.2s, transform 0.2s;
+.send-button-container button:hover {
+    background-color: var(--accent-primary-hover);
+    transform: scale(1.05);
 }
 
-.send-button-container button:hover {
-    background-color: var(--accent-primary-hover); 
-    transform: scale(1.05);
+.send-button-container button:active {
+    transform: scale(0.95);
+}
+
+.send-button-container button svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Animation for send button */
+@keyframes sendPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.send-button-container button:focus {
+    outline: none;
+    animation: sendPulse 0.3s ease-in-out;
 }
