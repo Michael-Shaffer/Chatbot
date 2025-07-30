@@ -117,6 +117,7 @@ Structure responses using these guidelines:
 - Suggest additional resources or SMEs when appropriate
 - Use bullet points for complex procedures or lists
 - Include relevant acronym definitions on first use
+- **Bold all acronyms** when they appear in responses (e.g., **STARS**, **TAMR**, **FSL**, **TCW**)
   </response_format>
 
 <example_interactions>
