@@ -106,4 +106,11 @@ def main():
     if args.stats:
         show_stats(chunks)
     if args.show > 0:
-        show_samples(chunks,_
+        show_samples(chunks, n=args.show, block_type=args.type)
+    if args.grep:
+        grep_chunks(chunks, args.grep)
+    if not (args.stats or args.show or args.grep):
+        print("Nothing to do. Use --stats, --show N, or --grep pattern.")
+
+if __name__ == "__main__":
+    main()
