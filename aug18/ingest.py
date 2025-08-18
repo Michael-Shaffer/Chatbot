@@ -1,316 +1,423 @@
-# ingest.py
-# Air-gapped PDF -> structured chunks with strict Section Intro (first paragraph after header).
-# Dependencies: pdfplumber, scikit-learn (for optional utilities), rapidfuzz (optional), python>=3.9
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Ingest PDFs -> JSONL for RAG with correct section_intro (first paragraph after header).
+
+Features:
+- Robust numbered heading detection (e.g., "2", "3.1", "4.2.7 – Title").
+- Excludes heading lines from paragraph stream so section_intro is the *real* intro paragraph.
+- Section metadata: section_path ("1.2.3"), section_label ("1.2.3 Title"), section_intro.
+- Optional table extraction via pdfplumber (graceful fallback if unavailable).
+- Page-level markdown snapshots (basic), banner filtering, stable IDs, token estimate.
+- Clean, shallow control flow for readability and maintainability.
+
+Requires: PyMuPDF (fitz). Optional: pdfplumber.
+"""
 
 from __future__ import annotations
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Optional, Tuple
-import pdfplumber
-import re
-import json
-import hashlib
+
 import argparse
+import json
+import re
+import time
+from dataclasses import dataclass, asdict
 from pathlib import Path
+from typing import Dict, Iterable, List, Optional, Tuple
 
-# --------------------------
-# Data models
-# --------------------------
+import fitz  # PyMuPDF
 
-@dataclass
-class Block:
+try:
+    import pdfplumber  # optional
+except Exception:  # noqa: BLE001
+    pdfplumber = None  # type: ignore
+
+# --------------------------- Config ---------------------------
+
+HEADING_RE = re.compile(
+    r"^(?P<num>\d{1,2}(?:\.\d{1,2}){0,6})[)\s\-–—:]+(?P<title>\S.+)$"
+)
+# Accept bare numbers as headings only when followed by non-empty title on same line.
+# Tweak tolerance to your PDFs if a few headers slip through.
+Y_TOL = 0.6  # points; align with text extraction jitter
+LEFT_MARGIN_MAX_FOR_HEAD = 120.0  # points; small x0 suggests a real block heading
+
+BANNER_MIN_Y_FRAC = 0.88  # bottom banner lines live below this fraction of page height
+
+BLOCK_ID_FMT = "{doc_id}_p{page:03d}_b{i:04d}"
+MD_PAGE_ID_FMT = "{doc_id}_p{page:03d}"
+
+# --------------------------- Types ---------------------------
+
+@dataclass(frozen=True)
+class Line:
+    page: int
+    x0: float
+    y0: float
+    size: float
+    text: str
+
+@dataclass(frozen=True)
+class Heading:
+    parts: List[str]
+    title: str
+    label: str      # "1.2.3 Title"
     page: int
     y0: float
     x0: float
-    kind: str          # "heading" | "paragraph" | "list" | "table"
-    text: str = ""
-    level: int = 0     # heading level if kind=="heading"
-    table_markdown: str = ""
-    table_summary: str = ""
-    section_path: str = ""
-    section_label: str = ""
+    size: float
 
-@dataclass
+@dataclass(frozen=True)
 class Chunk:
-    chunk_id: str
+    page: int
+    block_type: str          # "heading" | "paragraph" | "table"
+    text: str                # for table, can be markdown/plain
+    section_path: str        # "1.2.3"
+    section_label: str       # "1.2.3 Title"
+
+@dataclass(frozen=True)
+class Record:
     doc_id: str
     page: int
+    block_id: string
+    block_type: str
     section_path: str
     section_label: str
     section_intro: str
-    block_type: str
     text: str
-    table_markdown: str
-    table_summary: str
-    context_before: str
-    context_after: str
-    neighbors: List[str]
-    hidden_terms: List[str]  # acronym expansions etc.
+    tokens_est: int
+    ts_extracted: str
+    source_path: str
+    md_page_id: str
 
-# --------------------------
-# Heuristics
-# --------------------------
+# --------------------------- Small utils ---------------------------
 
-HEADER_RE = re.compile(r"^\s*(\d+(\.\d+)*)?\s*[A-Z][^\n]{0,120}$")
-NUM_PREFIX_RE = re.compile(r"^\s*(\d+(\.\d+)*)\s+")
-ACRO1 = re.compile(r"\b([A-Z]{2,})\s*\(([^)]+)\)")              # e.g., ASR (airport surveillance radar)
-ACRO2 = re.compile(r"\b([A-Za-z][A-Za-z\s-]{2,})\s*\(([A-Z]{2,})\)")  # e.g., airport surveillance radar (ASR)
-LIST_BULLET_RE = re.compile(r"^\s*(?:[-*•]\s+|\(\w\)\s+)")
+def norm_ws(s: str) -> str:
+    return re.sub(r"\s+", " ", (s or "")).strip()
 
-def is_heading(line: str) -> bool:
-    s = line.strip()
-    if not s or len(s) > 120:
-        return False
-    if HEADER_RE.match(s):
-        return True
-    # Title-ish: short, many capitals or words are Title Case
-    words = s.split()
-    caps_ratio = sum(1 for c in s if c.isupper()) / max(1, sum(1 for c in s if c.isalpha()))
-    title_case = sum(1 for w in words if w[:1].isupper()) / max(1, len(words))
-    return len(words) <= 15 and (caps_ratio > 0.5 or title_case > 0.8)
+def now_iso() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
-def heading_level(line: str) -> int:
-    m = NUM_PREFIX_RE.match(line.strip())
-    if m:
-        return min(6, m.group(1).count(".") + 1)
-    # fallback: infer by length/case
-    s = line.strip()
-    if s.isupper():
-        return 1
-    if len(s.split()) <= 4:
-        return 2
-    return 3
+def est_tokens(s: str) -> int:
+    # Rough/fast token estimate ~ 4 chars/token
+    return max(1, (len(s) + 3) // 4)
 
-def classify_block(line: str) -> str:
-    if is_heading(line):
-        return "heading"
-    if LIST_BULLET_RE.match(line):
-        return "list"
-    return "paragraph"
+def is_banner_line(line: Line, page_h: float) -> bool:
+    return line.y0 >= page_h * BANNER_MIN_Y_FRAC
 
-def md_table_from_plumber(table: List[List[str]]) -> str:
-    if not table or not table[0]:
-        return ""
-    # Normalize cells
-    rows = [[(c or "").strip() for c in row] for row in table]
-    header = rows[0]
-    widths = [max(len((row[i] if i < len(row) else "")) for row in rows[:50]) for i in range(len(header))]
-    def fmt_row(row: List[str]) -> str:
-        cells = [(row[i] if i < len(row) else "") for i in range(len(header))]
-        return "| " + " | ".join(cells) + " |"
-    out = [fmt_row(header)]
-    out.append("| " + " | ".join("-" * max(3, w) for w in widths) + " |")
-    for r in rows[1:12]:  # keep modest size
-        out.append(fmt_row(r))
-    return "\n".join(out)
+# --------------------------- PDF -> lines ---------------------------
 
-def summarize_table_md(md: str) -> str:
-    if not md:
-        return ""
-    lines = [ln.strip() for ln in md.splitlines() if ln.strip()]
-    header = lines[0] if lines else ""
-    cols = [c.strip() for c in header.strip("|").split("|")] if header.startswith("|") else []
-    cols = [c for c in cols if c]
-    if cols:
-        head = ", ".join(cols[:8])
-        return f"Table with columns: {head}."
-    return "Technical table with structured fields."
+def extract_lines_from_page(doc: fitz.Document, page_index: int) -> Tuple[List[Line], float]:
+    page = doc[page_index]
+    page_h = page.rect.height
+    data = page.get_text("dict")
+    out: List[Line] = []
 
-def dehyphenate(text: str) -> str:
-    return re.sub(r"(\w)-\n(\w)", r"\1\2", text)
-
-def normalize_text(text: str) -> str:
-    t = text.replace("\u00ad", "")       # soft hyphen
-    t = dehyphenate(t)
-    t = re.sub(r"[ \t]+", " ", t)
-    t = re.sub(r"\s+\n", "\n", t)
-    return t.strip()
-
-def content_hash(s: str) -> str:
-    return hashlib.blake2b(s.encode("utf-8"), digest_size=8).hexdigest()
-
-# --------------------------
-# Acronyms
-# --------------------------
-
-def build_acronym_map(all_text: str) -> Dict[str, str]:
-    m: Dict[str, str] = {}
-    for short, longf in ACRO1.findall(all_text):
-        m[short.strip()] = longf.strip()
-    for longf, short in ACRO2.findall(all_text):
-        m[short.strip()] = longf.strip()
-    return {k: v for k, v in m.items() if 2 < len(k) <= 12 and len(v) <= 120}
-
-# --------------------------
-# PDF -> Blocks
-# --------------------------
-
-def extract_blocks(pdf_path: str) -> List[Block]:
-    blocks: List[Block] = []
-    with pdfplumber.open(pdf_path) as pdf:
-        for pno, page in enumerate(pdf.pages, start=1):
-            words = page.extract_words(x_tolerance=2, y_tolerance=2, keep_blank_chars=False) or []
-            lines_map: Dict[Tuple[int, int], List[Dict[str, Any]]] = {}
-            for w in words:
-                key = (int(round(w["top"])), int(round(w["x0"])))
-                lines_map.setdefault(key, []).append(w)
-            lines: List[Tuple[float, float, str]] = []
-            for (top, x0), wlist in sorted(lines_map.items()):
-                text = " ".join(w["text"] for w in sorted(wlist, key=lambda x: x["x0"]))
-                lines.append((float(top), float(x0), normalize_text(text)))
-            # tables
-            md_tables: List[Tuple[float, str]] = []
-            try:
-                tables = page.extract_tables() or []
-                for t in tables:
-                    md = md_table_from_plumber(t)
-                    if md:
-                        top_guess = float(lines[0][0]) if lines else 0.0
-                        md_tables.append((top_guess, md))
-            except Exception:
-                pass
-            # classify into blocks
-            for (y0, x0, text) in lines:
-                if not text:
-                    continue
-                kind = classify_block(text)
-                lvl = heading_level(text) if kind == "heading" else 0
-                blocks.append(Block(page=pno, y0=y0, x0=x0, kind=kind, text=text, level=lvl))
-            for (y0, md) in md_tables:
-                blocks.append(Block(page=pno, y0=y0, x0=0.0, kind="table", table_markdown=md))
-    # sort
-    blocks.sort(key=lambda b: (b.page, b.y0, b.x0, 0 if b.kind == "heading" else 1))
-    return blocks
-
-# --------------------------
-# Section assignment & intros
-# --------------------------
-
-def assign_sections(blocks: List[Block]) -> None:
-    """Assign section_path and label from the running heading stack."""
-    stack: List[Block] = []
-    for b in blocks:
-        if b.kind == "heading":
-            while stack and stack[-1].level >= b.level:
-                stack.pop()
-            stack.append(b)
-        label = " > ".join(x.text.strip() for x in stack)
-        b.section_label = stack[-1].text.strip() if stack else ""
-        b.section_path = label
-
-def compute_strict_section_intros(blocks: List[Block]) -> Dict[str, str]:
-    """First block immediately after the header on the same page; must be a paragraph."""
-    intros: Dict[str, str] = {}
-    last_heading_by_page_path: Dict[Tuple[int, str], float] = {}
-    for b in blocks:
-        if b.kind == "heading" and b.section_path:
-            last_heading_by_page_path[(b.page, b.section_path)] = b.y0
-    seen_first_after: Dict[Tuple[int, str], Block] = {}
-    for b in blocks:
-        key = (b.page, b.section_path)
-        if key not in last_heading_by_page_path:
-            continue
-        if b.y0 <= last_heading_by_page_path[key] + 0.01:
-            continue
-        if key in seen_first_after:
-            continue
-        seen_first_after[key] = b
-    for (page, sp), first in seen_first_after.items():
-        if first.kind == "paragraph":
-            intros[sp] = first.text.strip()
-        else:
-            intros.setdefault(sp, "")
-    return intros
-
-# --------------------------
-# Table summaries
-# --------------------------
-
-def attach_table_summaries(blocks: List[Block]) -> None:
-    for b in blocks:
-        if b.kind != "table":
-            continue
-        if not b.table_markdown:
-            b.table_summary = ""
-            continue
-        b.table_summary = summarize_table_md(b.table_markdown)
-
-# --------------------------
-# Chunking
-# --------------------------
-
-def neighbors_by_section(blocks: List[Block]) -> Dict[str, List[str]]:
-    sections = [b.section_label for b in blocks if b.kind == "heading" and b.section_label]
-    out: Dict[str, List[str]] = {}
-    for i, lbl in enumerate(sections):
-        prev_lbl = sections[i - 1] if i > 0 else ""
-        next_lbl = sections[i + 1] if i + 1 < len(sections) else ""
-        out[lbl] = [p for p in (prev_lbl, next_lbl) if p]
-    return out
-
-def visible_text_ratio(text: str) -> float:
-    if not text:
-        return 0.0
-    letters = sum(c.isalpha() for c in text)
-    return letters / max(1, len(text))
-
-def make_chunks(pdf_path: str, doc_id: Optional[str] = None) -> List[Chunk]:
-    doc_id = doc_id or Path(pdf_path).stem
-    blocks = extract_blocks(pdf_path)
-    assign_sections(blocks)
-    attach_table_summaries(blocks)
-    intros = compute_strict_section_intros(blocks)
-    # acronym map from the whole document
-    all_text = "\n".join(b.text for b in blocks if b.text) + "\n" + "\n".join(b.table_markdown for b in blocks if b.table_markdown)
-    acro_map = build_acronym_map(all_text)
-    neigh = neighbors_by_section(blocks)
-
-    chunks: List[Chunk] = []
-    for i, b in enumerate(blocks):
-        if b.kind == "paragraph":
-            if len(b.text.strip()) < 25 or visible_text_ratio(b.text) < 0.35:
+    for block in data.get("blocks", []):
+        for line in block.get("lines", []):
+            # A line can have multiple spans; we form a single text with basic metrics
+            x0 = min((span.get("bbox", [0, 0, 0, 0])[0] for span in line.get("spans", []) if span.get("text")), default=0.0)
+            y0 = min((span.get("bbox", [0, 0, 0, 0])[1] for span in line.get("spans", []) if span.get("text")), default=0.0)
+            size = max((span.get("size", 0.0) for span in line.get("spans", []) if span.get("text")), default=0.0)
+            text = norm_ws("".join(span.get("text", "") for span in line.get("spans", [])))
+            if not text:
                 continue
-        section_intro = intros.get(b.section_path, "")
-        before = blocks[i - 1].text.strip() if i > 0 and blocks[i - 1].kind == "paragraph" else ""
-        after = blocks[i + 1].text.strip() if i + 1 < len(blocks) and blocks[i + 1].kind == "paragraph" else ""
-        text = b.text.strip() if b.kind != "table" else b.table_summary
-        chunk = Chunk(
-            chunk_id=f"{doc_id}-{b.page}-{content_hash((b.section_path or '') + (text or '')[:120])}",
-            doc_id=doc_id,
-            page=b.page,
-            section_path=b.section_path,
-            section_label=b.section_label,
-            section_intro=section_intro,
-            block_type=b.kind,
-            text=text,
-            table_markdown=b.table_markdown,
-            table_summary=b.table_summary,
-            context_before=before,
-            context_after=after,
-            neighbors=neigh.get(b.section_label, []),
-            hidden_terms=[v for v in acro_map.values()],
-        )
-        chunks.append(chunk)
+            out.append(Line(page=page_index + 1, x0=x0, y0=y0, size=size, text=text))
+
+    out.sort(key=lambda l: (l.page, l.y0, l.x0))
+    return out, page_h
+
+def all_lines(doc: fitz.Document) -> Tuple[List[Line], Dict[int, float]]:
+    lines: List[Line] = []
+    page_heights: Dict[int, float] = {}
+    for i in range(len(doc)):
+        plines, ph = extract_lines_from_page(doc, i)
+        lines.extend(plines)
+        page_heights[i + 1] = ph
+    return lines, page_heights
+
+# --------------------------- Heading detection ---------------------------
+
+def parse_heading_from_text(line: Line) -> Optional[Heading]:
+    m = HEADING_RE.match(line.text)
+    if not m:
+        return None
+    title = norm_ws(m.group("title"))
+    if not title:
+        return None
+    parts = m.group("num").split(".")
+    label = f"{m.group('num')} {title}"
+    return Heading(
+        parts=parts,
+        title=title,
+        label=label,
+        page=line.page,
+        y0=line.y0,
+        x0=line.x0,
+        size=line.size,
+    )
+
+def detect_headings(lines: Iterable[Line]) -> List[Heading]:
+    heads: List[Heading] = []
+    for ln in lines:
+        h = parse_heading_from_text(ln)
+        if not h:
+            continue
+        if ln.x0 > LEFT_MARGIN_MAX_FOR_HEAD:
+            continue
+        heads.append(h)
+    heads.sort(key=lambda h: (h.page, h.y0))
+    return heads
+
+def heads_by_page(heads: List[Heading]) -> Dict[int, List[Heading]]:
+    byp: Dict[int, List[Heading]] = {}
+    for h in heads:
+        byp.setdefault(h.page, []).append(h)
+    for p in byp:
+        byp[p].sort(key=lambda hh: hh.y0)
+    return byp
+
+# --------------------------- Section assignment ---------------------------
+
+def nearest_active_heading(ln: Line, page_heads: List[Heading], active: Optional[Heading]) -> Optional[Heading]:
+    eligible = [h for h in page_heads if h.y0 <= ln.y0 + Y_TOL]
+    return eligible[-1] if eligible else active
+
+def as_sec_path_label(h: Optional[Heading]) -> Tuple[str, str]:
+    if not h:
+        return "", ""
+    return ".".join(h.parts), h.label
+
+# --------------------------- Chunk building ---------------------------
+
+def filter_non_heading_paragraphs(
+    lines: List[Line],
+    page_heads_map: Dict[int, List[Heading]],
+    page_heights: Dict[int, float],
+) -> List[Line]:
+    flines: List[Line] = []
+    for ln in lines:
+        if is_banner_line(ln, page_heights[ln.page]):
+            continue
+        t = ln.text
+        if not t:
+            continue
+
+        # exclude lines that are the heading itself (y-match) or look like a heading by regex + left margin/size
+        p_heads = page_heads_map.get(ln.page, [])
+        is_head_y = any(abs(ln.y0 - h.y0) <= Y_TOL for h in p_heads)
+        is_head_like = parse_heading_from_text(ln) is not None and ln.x0 <= LEFT_MARGIN_MAX_FOR_HEAD
+        if is_head_y or is_head_like:
+            continue
+
+        flines.append(ln)
+    return flines
+
+def chunk_paragraphs(
+    lines: List[Line],
+    page_heads_map: Dict[int, List[Heading]],
+) -> List[Chunk]:
+    chunks: List[Chunk] = []
+    buf: List[str] = []
+    cur_page = 1
+    cur_sec_path, cur_sec_label = "", ""
+    active: Optional[Heading] = None
+
+    def flush():
+        if not buf:
+            return
+        text = norm_ws(" ".join(buf))
+        if text:
+            chunks.append(Chunk(page=cur_page, block_type="paragraph",
+                                text=text, section_path=cur_sec_path, section_label=cur_sec_label))
+        buf.clear()
+
+    for ln in lines:
+        active = nearest_active_heading(ln, page_heads_map.get(ln.page, []), active)
+        cur_sec_path, cur_sec_label = as_sec_path_label(active)
+        cur_page = ln.page
+        buf.append(ln.text)
+
+    flush()
     return chunks
 
-# --------------------------
-# CLI
-# --------------------------
+def chunk_headings(heads: List[Heading]) -> List[Chunk]:
+    out: List[Chunk] = []
+    for h in heads:
+        sec_path, sec_label = ".".join(h.parts), h.label
+        out.append(Chunk(page=h.page, block_type="heading",
+                         text=h.label, section_path=sec_path, section_label=sec_label))
+    return out
 
-def write_jsonl(chunks: List[Chunk], out_path: str) -> None:
-    with open(out_path, "w", encoding="utf-8") as f:
-        for ch in chunks:
-            f.write(json.dumps(asdict(ch), ensure_ascii=False) + "\n")
+# --------------------------- Section intros ---------------------------
 
-def main():
-    ap = argparse.ArgumentParser(description="Ingest PDFs into high-quality chunks.")
-    ap.add_argument("pdf", help="Path to a PDF file")
-    ap.add_argument("--out", default="", help="Output .jsonl (defaults to <pdf>.jsonl)")
+def build_section_intro_map(chunks: List[Chunk]) -> Dict[str, str]:
+    intros: Dict[str, str] = {}
+    seen: set[str] = set()
+
+    for ck in chunks:
+        if ck.block_type == "heading" and ck.section_path:
+            seen.add(ck.section_path)
+            continue
+        if ck.block_type == "paragraph" and ck.section_path and ck.section_path in seen:
+            if ck.section_path not in intros:
+                intros[ck.section_path] = ck.text
+    return intros
+
+# --------------------------- Page markdown ---------------------------
+
+def page_markdown(lines: List[Line], page_no: int) -> str:
+    txt = "\n".join(l.text for l in lines if l.page == page_no)
+    return txt.strip()
+
+# --------------------------- Tables (optional) ---------------------------
+
+def extract_tables_markdown(pdf_path: Path) -> Dict[int, List[str]]:
+    if pdfplumber is None:
+        return {}
+    out: Dict[int, List[str]] = {}
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        for i, page in enumerate(pdf.pages, start=1):
+            md_blocks: List[str] = []
+            try:
+                tables = page.extract_tables() or []
+            except Exception:  # noqa: BLE001
+                tables = []
+            for tbl in tables:
+                if not tbl:
+                    continue
+                # simple GitHub-flavored markdown table rendering
+                header = tbl[0]
+                rows = tbl[1:] if len(tbl) > 1 else []
+                line1 = "| " + " | ".join(c or "" for c in header) + " |"
+                line2 = "| " + " | ".join("---" for _ in header) + " |"
+                body = ["| " + " | ".join(c or "" for c in r) + " |" for r in rows]
+                md = "\n".join([line1, line2, *body])
+                md_blocks.append(md)
+            if md_blocks:
+                out[i] = md_blocks
+    return out
+
+def table_chunks_with_sections(
+    table_md_by_page: Dict[int, List[str]],
+    page_heads_map: Dict[int, List[Heading]],
+) -> List[Chunk]:
+    chunks: List[Chunk] = []
+    for page, md_list in table_md_by_page.items():
+        active: Optional[Heading] = None
+        # We assign each table on a page to the most recent heading on that page (last heading before bottom)
+        hs = page_heads_map.get(page, [])
+        last = hs[-1] if hs else None
+        active = last
+        sec_path, sec_label = as_sec_path_label(active)
+        for md in md_list:
+            chunks.append(Chunk(page=page, block_type="table",
+                                text=md, section_path=sec_path, section_label=sec_label))
+    return chunks
+
+# --------------------------- Emit ---------------------------
+
+def emit_records(
+    doc_id: str,
+    pdf_path: Path,
+    chunks: List[Chunk],
+    intro_map: Dict[str, str],
+    out_jsonl: Path,
+    total_pages: int,
+) -> None:
+    ts = now_iso()
+    with out_jsonl.open("a", encoding="utf-8") as fo:
+        for i, ck in enumerate(chunks):
+            md_page_id = MD_PAGE_ID_FMT.format(doc_id=doc_id, page=ck.page)
+            rec = {
+                "doc_id": doc_id,
+                "page": ck.page,
+                "block_id": BLOCK_ID_FMT.format(doc_id=doc_id, page=ck.page, i=i),
+                "block_type": ck.block_type,
+                "section_path": ck.section_path,
+                "section_label": ck.section_label,
+                "section_intro": intro_map.get(ck.section_path, ""),
+                "text": ck.text,
+                "tokens_est": est_tokens(ck.text),
+                "ts_extracted": ts,
+                "source_path": str(pdf_path),
+                "md_page_id": md_page_id,
+                "pages_total": total_pages,
+            }
+            fo.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+# --------------------------- Driver ---------------------------
+
+def process_pdf(pdf_path: Path, out_jsonl: Path) -> None:
+    with fitz.open(pdf_path) as doc:
+        lines, page_heights = all_lines(doc)
+        total_pages = len(doc)
+
+    heads = detect_headings(lines)
+    page_heads_map = heads_by_page(heads)
+
+    # Build heading chunks (for metadata/TOC purposes)
+    heading_chunks = chunk_headings(heads)
+
+    # Filter out headings from paragraph stream (this is the critical fix)
+    non_head_lines = filter_non_heading_paragraphs(lines, page_heads_map, page_heights)
+
+    # Build paragraph chunks
+    para_chunks = chunk_paragraphs(non_head_lines, page_heads_map)
+
+    # Optional table chunks
+    tables_md = extract_tables_markdown(pdf_path)
+    table_chunks = table_chunks_with_sections(tables_md, page_heads_map)
+
+    # Merge in logical order: headings (for reference), paragraphs, then tables
+    chunks = [*heading_chunks, *para_chunks, *table_chunks]
+
+    # Section intros: first paragraph chunk after each heading
+    intro_map = build_section_intro_map(chunks)
+
+    emit_records(
+        doc_id=pdf_path.stem,
+        pdf_path=pdf_path,
+        chunks=chunks,
+        intro_map=intro_map,
+        out_jsonl=out_jsonl,
+        total_pages=total_pages,
+    )
+
+def write_page_markdown_snapshots(pdf_path: Path, md_out_dir: Path) -> None:
+    md_out_dir.mkdir(parents=True, exist_ok=True)
+    with fitz.open(pdf_path) as doc:
+        lines_by_page: Dict[int, List[Line]] = {}
+        all_lns, _ = all_lines(doc)
+        for ln in all_lns:
+            lines_by_page.setdefault(ln.page, []).append(ln)
+        for page_no, lns in lines_by_page.items():
+            md = page_markdown(lns, page_no)
+            pid = MD_PAGE_ID_FMT.format(doc_id=pdf_path.stem, page=page_no)
+            (md_out_dir / f"{pid}.md").write_text(md + "\n", encoding="utf-8")
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Ingest PDFs to JSONL with correct section_intro.")
+    ap.add_argument("input", type=Path, help="PDF file or directory of PDFs")
+    ap.add_argument("--out", type=Path, required=True, help="Output JSONL path")
+    ap.add_argument("--md-dir", type=Path, default=None, help="Optional directory to write page markdown snapshots")
     args = ap.parse_args()
 
-    out = args.out or (str(Path(args.pdf).with_suffix(".jsonl")))
-    chunks = make_chunks(args.pdf)
-    write_jsonl(chunks, out)
-    print(f"Wrote {len(chunks)} chunks -> {out}")
+    if args.out.exists():
+        args.out.unlink()
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+
+    pdfs: List[Path] = []
+    if args.input.is_file() and args.input.suffix.lower() == ".pdf":
+        pdfs = [args.input]
+    elif args.input.is_dir():
+        pdfs = sorted(p for p in args.input.rglob("*.pdf"))
+    else:
+        raise SystemExit("Provide a PDF file or a directory containing PDFs.")
+
+    for p in pdfs:
+        process_pdf(p, args.out)
+        if args.md_dir:
+            write_page_markdown_snapshots(p, args.md_dir)
 
 if __name__ == "__main__":
     main()
