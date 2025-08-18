@@ -29,6 +29,14 @@ TOP_MARGIN_PCT = 0.09
 BOTTOM_MARGIN_PCT = 0.09
 BANNER_FREQ_THRESHOLD = 0.30  # >=30% pages
 
+# Common sub-heading terms that appear after numbered headings
+SUB_HEADING_TERMS = {
+    "introduction", "application", "overview", "background", 
+    "purpose", "scope", "summary", "description", "objective",
+    "objectives", "requirements", "definitions", "references",
+    "methodology", "approach", "conclusion", "recommendations"
+}
+
 # Regex patterns to drop anywhere (even mid-page)
 BAN_PATTERNS = [
     r"\b(?:Export(?:\s+and)?\s+Distribution\s+Controlled)\b.*",
@@ -119,6 +127,29 @@ def norm_ws(s: Optional[str]) -> str:
 def is_date_like_line(text: str) -> bool:
     return bool(DATE_LIKE.match(text.strip()))
 
+def is_sub_heading(text: str, next_line: Optional[str] = None) -> bool:
+    """
+    Check if a line is likely a sub-heading (like "Application" or "Introduction")
+    that appears after a numbered heading.
+    """
+    # Clean the text
+    cleaned = text.strip().lower().rstrip(':').rstrip('.')
+    
+    # Check if it's a known sub-heading term
+    if cleaned in SUB_HEADING_TERMS:
+        return True
+    
+    # Check if it's very short (likely a heading) and followed by longer text
+    if len(text.strip()) < 20 and next_line and len(next_line.strip()) > 50:
+        # Additional heuristic: short line followed by longer paragraph
+        return True
+    
+    # Check if it ends with a colon (often indicates a heading)
+    if text.strip().endswith(':') and len(text.strip()) < 30:
+        return True
+    
+    return False
+
 def is_toc_page(lines: Sequence[str]) -> bool:
     head = " ".join(lines[:12])
     if _TOC_HDR_RE.search(head):
@@ -129,7 +160,7 @@ def is_toc_page(lines: Sequence[str]) -> bool:
 def parse_numbered_heading(text: str) -> Optional[Tuple[List[str], str, str]]:
     if is_date_like_line(text):
         return None
-    m = _NUM_HEADING_RE.match(text.strip())
+    m = NUM_HEADING_RE.match(text.strip())
     if not m:
         return None
     num = m.group("num")
@@ -554,6 +585,45 @@ def quick_token_estimate(text: str) -> int:
     # crude but stable estimator for auditing/packing decisions
     return max(1, len(text.split()))
 
+def capture_section_intro(typed_lines: List[TypedLine], max_intro_chars: int = 500) -> Dict[str, str]:
+    """
+    Capture the actual intro paragraph(s) for each section,
+    skipping sub-headings like "Application" or "Introduction".
+    """
+    section_intro_map: Dict[str, str] = {}
+    section_buffer: Dict[str, List[str]] = {}
+    
+    for i, tl in enumerate(typed_lines):
+        if not tl.section_path:
+            continue
+            
+        # Skip if this looks like a sub-heading
+        next_line_text = typed_lines[i + 1].text if i + 1 < len(typed_lines) else None
+        if is_sub_heading(tl.text, next_line_text):
+            continue
+            
+        # Only capture paragraphs for section intros
+        if tl.bt != "paragraph":
+            continue
+            
+        # Initialize buffer for this section if needed
+        if tl.section_path not in section_buffer:
+            section_buffer[tl.section_path] = []
+        
+        # Add to buffer if we haven't exceeded max chars
+        current_len = sum(len(t) for t in section_buffer[tl.section_path])
+        if current_len < max_intro_chars:
+            section_buffer[tl.section_path].append(tl.text)
+            
+            # Update the intro map with combined text
+            section_intro_map[tl.section_path] = " ".join(section_buffer[tl.section_path])
+            
+            # Stop collecting for this section if we have enough
+            if current_len + len(tl.text) >= max_intro_chars:
+                section_buffer[tl.section_path] = None  # Mark as complete
+    
+    return section_intro_map
+
 # --------------------------- Main ingestion ---------------------------
 
 def ingest_pdf_to_jsonl(pdf_path: Path, out_jsonl: Path, tables_dir: Path, emit_page_md: bool, pages_dir: Path) -> None:
@@ -593,8 +663,6 @@ def ingest_pdf_to_jsonl(pdf_path: Path, out_jsonl: Path, tables_dir: Path, emit_
     # Create set of heading lines for efficient lookup
     heading_lines_set = get_heading_lines_set(heads_by_page)
     
-    section_intro_map: Dict[str, str] = {}
-
     # Emit
     offset = 0
     with out_jsonl.open("a", encoding="utf-8") as fo:
@@ -655,12 +723,8 @@ def ingest_pdf_to_jsonl(pdf_path: Path, out_jsonl: Path, tables_dir: Path, emit_
                 bt = classify_block(ln.text, ln.x0)
                 typed_lines.append(TypedLine(bt=bt, text=ln.text, y0=ln.y0, section_path=sec_path, section_label=sec.label))
 
-            # Capture section intros - now we're guaranteed to get the first real paragraph
-            # after the heading, not the heading itself
-            for tl in typed_lines:
-                if tl.bt == "paragraph" and tl.section_path and tl.section_path not in section_intro_map:
-                    # This is the first paragraph in this section
-                    section_intro_map[tl.section_path] = tl.text
+            # Capture section intros using the improved function
+            section_intro_map = capture_section_intro(typed_lines)
 
             # Pack
             packed = pack_chunks(typed_lines)
