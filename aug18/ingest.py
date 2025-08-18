@@ -108,7 +108,7 @@ _WS_RE = re.compile(r"\s+")
 _TOC_HDR_RE = re.compile(r"\bTABLE OF CONTENTS\b", re.IGNORECASE)
 _TOC_LINE_RE = re.compile(r"^\s*\d+(?:\.\d+){0,6}\s+.+?\.{3,}\s*\d+\s*$")
 
-_NUM_HEADING_RE = re.compile(r"^(?P<num>\d{1,2}(?:\.\d{1,2}){0,6})[)\s\-â€"â€":]+(?P<title>\S.+)$")
+NUM_HEADING_RE = re.compile(r"^(?P<num>\d{1,2}(?:\.\d{1,2}){0,6})[)\s\-:]+(?P<title>\S.+)$")
 _LIST_RE = re.compile(r"^(\- |\* |\d+[\.)] )")
 _CODE_HINT_RE = re.compile(r"[{};]|^(code|snippet|example)$", re.IGNORECASE)
 BAN_RE_LIST = [re.compile(pat, re.IGNORECASE) for pat in BAN_PATTERNS]
