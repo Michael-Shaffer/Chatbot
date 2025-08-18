@@ -591,12 +591,21 @@ def capture_section_intro(typed_lines: List[TypedLine], max_intro_chars: int = 5
     skipping sub-headings like "Application" or "Introduction".
     """
     section_intro_map: Dict[str, str] = {}
-    section_buffer: Dict[str, List[str]] = {}
+    section_buffer: Dict[str, Optional[List[str]]] = {}  # Allow for None to mark completion
     
     for i, tl in enumerate(typed_lines):
         if not tl.section_path:
             continue
             
+        # Initialize buffer for this section if it's the first time we see it
+        if tl.section_path not in section_buffer:
+            section_buffer[tl.section_path] = []
+        
+        # If the buffer is None, it means we've finished collecting for this section.
+        # Skip to the next line.
+        if section_buffer[tl.section_path] is None:
+            continue
+
         # Skip if this looks like a sub-heading
         next_line_text = typed_lines[i + 1].text if i + 1 < len(typed_lines) else None
         if is_sub_heading(tl.text, next_line_text):
@@ -606,24 +615,22 @@ def capture_section_intro(typed_lines: List[TypedLine], max_intro_chars: int = 5
         if tl.bt != "paragraph":
             continue
             
-        # Initialize buffer for this section if needed
-        if tl.section_path not in section_buffer:
-            section_buffer[tl.section_path] = []
+        # This is now safe because we've checked for None
+        current_buffer = section_buffer[tl.section_path]
+        current_len = sum(len(t) for t in current_buffer)
         
-        # Add to buffer if we haven't exceeded max chars
-        current_len = sum(len(t) for t in section_buffer[tl.section_path])
         if current_len < max_intro_chars:
-            section_buffer[tl.section_path].append(tl.text)
+            current_buffer.append(tl.text)
             
             # Update the intro map with combined text
-            section_intro_map[tl.section_path] = " ".join(section_buffer[tl.section_path])
+            section_intro_map[tl.section_path] = " ".join(current_buffer)
             
-            # Stop collecting for this section if we have enough
+            # Mark as complete if we have now reached the character limit
             if current_len + len(tl.text) >= max_intro_chars:
-                section_buffer[tl.section_path] = None  # Mark as complete
+                section_buffer[tl.section_path] = None
     
     return section_intro_map
-
+    
 # --------------------------- Main ingestion ---------------------------
 
 def ingest_pdf_to_jsonl(pdf_path: Path, out_jsonl: Path, tables_dir: Path, emit_page_md: bool, pages_dir: Path) -> None:
