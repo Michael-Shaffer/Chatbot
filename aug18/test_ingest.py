@@ -7,6 +7,7 @@
 
 import argparse
 import json
+import random
 from pathlib import Path
 from collections import Counter
 from typing import Any, Dict, List, Iterable
@@ -43,8 +44,9 @@ def show_samples(chunks: List[Dict[str, Any]], n: int = 6, block_type: str = "")
     if block_type:
         chunks = [c for c in chunks if c.get("block_type") == block_type]
     take = min(n, len(chunks))
-    print(f"\n=== Sample Chunks ({take}/{total}{' filtered' if block_type else ''}) ===")
-    for ch in chunks[:take]:
+    sample = random.sample(chunks, take) if chunks else []
+    print(f"\n=== Random Sample ({take}/{total}{' filtered' if block_type else ''}) ===")
+    for ch in sample:
         print(f"- id={ch.get('chunk_id','')}  page={ch.get('page',0)}  type={ch.get('block_type','')}")
         print(f"  section: {ch.get('section_label') or ch.get('section_path')}")
         if ch.get("section_intro"):
@@ -92,7 +94,7 @@ def grep_chunks(chunks: List[Dict[str, Any]], pattern: str, n: int = 10) -> None
 def parse_args():
     ap = argparse.ArgumentParser(description="Inspect JSONL chunks from ingest.py")
     ap.add_argument("--jsonl", required=True, help="Path to chunks.jsonl")
-    ap.add_argument("--show", type=int, default=0, help="Show N sample chunks")
+    ap.add_argument("--show", type=int, default=0, help="Show N random sample chunks")
     ap.add_argument("--type", default="", help="Filter samples by block_type (paragraph|table|list|heading)")
     ap.add_argument("--stats", action="store_true", help="Show corpus statistics")
     ap.add_argument("--grep", default="", help="Regex search in chunk text")
@@ -104,11 +106,4 @@ def main():
     if args.stats:
         show_stats(chunks)
     if args.show > 0:
-        show_samples(chunks, n=args.show, block_type=args.type)
-    if args.grep:
-        grep_chunks(chunks, args.grep)
-    if not (args.stats or args.show or args.grep):
-        print("Nothing to do. Use --stats, --show N, or --grep pattern.")
-
-if __name__ == "__main__":
-    main()
+        show_samples(chunks,_
