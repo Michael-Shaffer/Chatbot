@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     messageInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            // Only dispatch submit if no request is in progress
             if (!isRequestInProgress) {
                 chatForm.dispatchEvent(new Event('submit'));
             }
@@ -42,10 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     stopButton.addEventListener('click', () => {
         if (currentAbortController) {
-            currentAbortController.abort(); // Abort the ongoing fetch request
+            currentAbortController.abort();
             console.log('Chatbot generation stopped by user.');
-            stopButton.disabled = true; // Disable stop button after stopping
-            // This message is added immediately on stop, before the catch block handles the AbortError
+            stopButton.disabled = true;
             addMessageToChat('Bot generation stopped.', 'bot-info');
         }
     });
@@ -53,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleFormSubmit(e) {
         e.preventDefault();
 
-        // Prevent submission if a request is already in progress
         if (isRequestInProgress) {
             console.log('Request already in progress. Please wait.');
             return;
@@ -67,20 +64,18 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeContainer.remove();
         }
 
-        chatHistory.push({ role: 'user', content: messageText }); // Add user message to history
-        addMessageToChat(messageText, 'user');
+        chatHistory.push({ role: 'user', content: messageText });
+        addMessageToChat(escapeHTML(messageText), 'user');
 
         messageInput.value = '';
         autoResize(messageInput);
 
-        // Disable input and set flag
         messageInput.disabled = true;
         stopButton.disabled = false;
         isRequestInProgress = true;
 
         currentAbortController = new AbortController();
 
-        // Pass chatHistory to getBotResponse for the LLM call
         await getBotResponse(chatHistory, currentAbortController.signal);
     }
 
@@ -96,23 +91,143 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         messageContainer.appendChild(contentDiv);
+
+        // actions row (added for bot messages later)
+        const actionsDiv = document.createElement('div');
+        actionsDiv.classList.add('message-actions'); // style in CSS if you like
+        messageContainer.appendChild(actionsDiv);
+
         chatMessages.appendChild(messageContainer);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        return contentDiv;
+        return contentDiv; // (unchanged) callers rely on this
+    }
+
+    // Basic HTML escape for user messages to avoid accidental HTML injection
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, (m) => (
+            { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]
+        ));
     }
 
     // Helper function to apply highlighting
     function applyHighlighting(element) {
-        // Find all pre > code blocks within the given element and highlight them
         element.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
         });
     }
 
+    // --- FLAGGING SUPPORT ---
+
+    function attachFlagButton(botContentElement, payloadProvider) {
+        const container = botContentElement.parentElement; // messageContainer
+        const actionsRow = container.querySelector('.message-actions');
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'flag-btn';
+        btn.title = 'Flag this response';
+        btn.setAttribute('aria-label', 'Flag this response');
+        btn.style.display = 'inline-flex';
+        btn.style.alignItems = 'center';
+        btn.style.gap = '6px';
+        btn.style.fontSize = '12px';
+        btn.style.padding = '6px 8px';
+        btn.style.border = '1px solid var(--border, #333)';
+        btn.style.borderRadius = '6px';
+        btn.style.background = 'transparent';
+        btn.style.cursor = 'pointer';
+        btn.style.opacity = '0.8';
+
+        btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M6 3v18H4V3h2zm2 0h8l-1.5 3L18 9H8V3z"></path>
+            </svg>
+            <span>Flag</span>
+        `;
+
+        const statusSpan = document.createElement('span');
+        statusSpan.style.fontSize = '12px';
+        statusSpan.style.marginLeft = '8px';
+        statusSpan.style.opacity = '0.8';
+
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            statusSpan.textContent = 'Sending...';
+
+            const payload = payloadProvider();
+
+            try {
+                const res = await fetch(`${window.location.origin}/api/flag`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Server returned ${res.status}`);
+                }
+
+                statusSpan.textContent = 'Flagged ✓';
+            } catch (err) {
+                console.warn('Flagging failed, saving locally.', err);
+                statusSpan.textContent = 'Saved offline';
+
+                // Save to localStorage queue
+                try {
+                    const key = 'polarisFlags';
+                    const existing = JSON.parse(localStorage.getItem(key) || '[]');
+                    existing.push(payload);
+                    localStorage.setItem(key, JSON.stringify(existing));
+                } catch (_) {}
+
+                // Also offer a one-click download so you can inspect immediately
+                try {
+                    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `polaris-flag-${Date.now()}.json`;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    a.remove();
+                } catch (_) {}
+            } finally {
+                // After sending, lock button to prevent duplicates
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            }
+        });
+
+        actionsRow.appendChild(btn);
+        actionsRow.appendChild(statusSpan);
+    }
+
+    function buildFlagPayload({ userText, botText }) {
+        return {
+            timestamp: new Date().toISOString(),
+            path: window.location.pathname + window.location.hash,
+            userText,
+            botText,
+            chatHistorySnapshot: chatHistory.slice(-20), // include recent context (tune as desired)
+            ua: navigator.userAgent
+        };
+    }
+
     async function getBotResponse(currentChatHistory, signal) {
         const botContentElement = addMessageToChat('', 'bot'); // Create the DOM element for bot response
         let fullBotResponse = '';
+
+        // Capture the most recent user message now, so it's paired with this bot reply
+        const lastUserMsg = (() => {
+            for (let i = currentChatHistory.length - 1; i >= 0; i--) {
+                if (currentChatHistory[i].role === 'user') return currentChatHistory[i].content;
+            }
+            return '';
+        })();
 
         try {
             const apiUrl = `${window.location.origin}/api/chat`;
@@ -120,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: currentChatHistory, // Send the full chat history
+                    messages: currentChatHistory,
                     stream: true,
                 }),
                 signal: signal
@@ -148,10 +263,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (json_str === '[DONE]') {
                             console.log('Stream finished by [DONE] signal.');
                             reader.releaseLock();
-                            // Add bot's full response to chatHistory here
                             chatHistory.push({ role: 'assistant', content: fullBotResponse });
-                            applyHighlighting(botContentElement); // Highlight the final content
-                            return; // Exit the function
+                            applyHighlighting(botContentElement);
+
+                            // Attach flag button now that we have the final text
+                            attachFlagButton(botContentElement, () => buildFlagPayload({
+                                userText: lastUserMsg,
+                                botText: fullBotResponse
+                            }));
+                            return;
                         }
 
                         try {
@@ -159,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (data.choices && data.choices.length > 0) {
                                 const delta = data.choices[0].delta.content || '';
                                 fullBotResponse += delta;
-                                // Update innerHTML with parsed markdown incrementally
                                 botContentElement.innerHTML = marked.parse(fullBotResponse);
                                 chatMessages.scrollTop = chatMessages.scrollHeight;
                             }
@@ -170,38 +289,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // This block is reached if the stream ends naturally (done: true) without a [DONE] signal
+            // Natural end without [DONE]
             stopButton.disabled = true;
-            // Add bot's full response to chatHistory here as well for natural stream end
             chatHistory.push({ role: 'assistant', content: fullBotResponse });
-            applyHighlighting(botContentElement); // Ensure highlighting for naturally ended stream
+            applyHighlighting(botContentElement);
+
+            attachFlagButton(botContentElement, () => buildFlagPayload({
+                userText: lastUserMsg,
+                botText: fullBotResponse
+            }));
 
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.warn('Fetch aborted by user.');
                 if (fullBotResponse) {
                     botContentElement.innerHTML = marked.parse(fullBotResponse + ' *(stopped)*');
-                    applyHighlighting(botContentElement); // Highlight even if aborted mid-generation
+                    applyHighlighting(botContentElement);
                     chatHistory.push({ role: 'assistant', content: fullBotResponse + ' *(stopped)*' });
+
+                    attachFlagButton(botContentElement, () => buildFlagPayload({
+                        userText: lastUserMsg,
+                        botText: fullBotResponse + ' *(stopped)*'
+                    }));
                 }
             } else {
                 console.error('Error fetching bot response:', error);
                 if (fullBotResponse) {
                     botContentElement.innerHTML = marked.parse(fullBotResponse + `<br><br>Sorry, an error occurred: ${error.message}`);
-                    applyHighlighting(botContentElement); // Highlight on error if partial content exists
+                    applyHighlighting(botContentElement);
                     chatHistory.push({ role: 'assistant', content: fullBotResponse + ` (Error: ${error.message})` });
+
+                    attachFlagButton(botContentElement, () => buildFlagPayload({
+                        userText: lastUserMsg,
+                        botText: fullBotResponse + ` (Error: ${error.message})`
+                    }));
                 } else {
                     botContentElement.innerHTML = 'Sorry, an error occurred: ' + error.message;
                     chatHistory.push({ role: 'assistant', content: `Sorry, an error occurred: ${error.message}` });
+
+                    attachFlagButton(botContentElement, () => buildFlagPayload({
+                        userText: lastUserMsg,
+                        botText: `Sorry, an error occurred: ${error.message}`
+                    }));
                 }
             }
             stopButton.disabled = true;
         } finally {
             currentAbortController = null;
-            // Re-enable input and reset flag
             messageInput.disabled = false;
             isRequestInProgress = false;
-            messageInput.focus(); // Bring focus back to the input
+            messageInput.focus();
         }
     }
 
