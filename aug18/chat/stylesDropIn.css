@@ -1,0 +1,16 @@
+.message-actions {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.9;
+}
+
+.bot-message .message-actions {
+  /* keep it subtle for bot replies */
+}
+
+.flag-btn:hover {
+  opacity: 1 !important;
+  transform: translateY(-0.5px);
+}
