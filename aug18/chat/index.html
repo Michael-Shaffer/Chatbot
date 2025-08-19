@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaris Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="lib/highlight.js/styles/tokyo-night-dark.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="home-link">Polaris</a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <h2 class="sidebar-subheading">Documents</h2>
+            <nav class="document-list" id="document-list">
+                <a href="#409" class="document-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>409</span>
+                </a>
+                <a href="#408" class="document-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>408</span>
+                </a>
+                <a href="#4428" class="document-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>4428</span>
+                </a>
+            </nav>
+        </aside>
+        <main class="chat-interface">
+            <div id="chat-messages">
+                <div class="welcome-container">
+                    <svg class="polaris-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <h1 class="welcome-title">Hello, I'm <span class="gradient-text">Polaris</span></h1>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <form class="chat-input-form" id="chat-form">
+                <div class="message-input-wrapper">
+                    <textarea
+                        id="message-input"
+                        placeholder="Ask anything about the 409..."
+                        autocomplete="off"
+                        rows="1"
+                    ></textarea>
+                    <div class="send-button-container">
+                        <button type="submit" title="Send Message">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="stop-button-container">
+                        <button type="button" id="stop-button" title="Stop Generation" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
+                                <path d="M6 6h12v12H6z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="lib/marked.min.js"></script>
+    <script src="lib/highlight.js/highlight.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
