@@ -1,5 +1,5 @@
 :root {
-    --accent-primary: #D4A056;
+    --accent-primary: #D4A056; 
     --bg-primary: #171A21;
     --bg-secondary: #232834;
     --bg-tertiary: #303747;
@@ -10,628 +10,1374 @@
     --accent-primary-muted: color-mix(in srgb, var(--accent-primary) 15%, transparent);
     --user-bubble-bg: var(--accent-primary);
     --accent-primary-hover: color-mix(in srgb, var(--accent-primary) 85%, black);
-    --font-family-sans: Verdana, 'Segoe UI', Calibri, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-sans: 'Segoe UI', Calibri, 'Helvetica Neue', Arial, sans-serif;
     --font-family-serif: Georgia, 'Times New Roman', serif;
-
-    --code-block-bg: #1A1B26;
-    --code-inline-bg: #cccccc;
-    --code-text-color: #f8f8f2;
-
-    /* Define a consistent base font size for chat messages */
-    --chat-message-font-size: 1rem; /* Base size */
-    /* Use a clamp for responsiveness: min-size, preferred-size, max-size */
-    /* For example: clamp(0.95rem, 0.4vw + 0.9rem, 1.1rem) */
-    /* Let's refine this to be slightly larger for better readability */
-    --chat-message-font-size-clamped: clamp(0.95rem, 0.5vw + 0.9rem, 1.15rem);
-    --chat-message-line-height: 1.6; /* Consistent line height */
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: var(--font-family-sans);
-    min-height: 100vh;
-    overflow: hidden;
-}
-
-/* --- Layout (from original file) --- */
-.page-wrapper {
-    display: flex;
+    margin: 0;
+    padding: 0;
     height: 100vh;
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, rgba(20, 30, 70, 0.3), rgba(0, 0, 0, 0) 60%);
 }
 
-.sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background: var(--bg-secondary);
-    border-right: 1px solid var(--border-primary);
-    flex-direction: column;
-    padding: 1.5rem;
-    box-sizing: border-box;
-}
-
-.sidebar-header {
+.text-container {
+    position: relative;
+    z-index: 10;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-start;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0rem;
+    box-sizing: border-box;
+    gap: 0;
+    /* gap: clamp(0.1rem, 3vh, 1.5rem); */
 }
 
-.home-link {
-    align-self: center;
-    width: 100%;
-    text-align: center;
-}
-
-.sidebar-header .home-link {
-    font-family: var(--font-family-sans);
-    font-size: 2rem;
+#polaris-text {
+    font-family: 'Trebuchet MS', Georgia, 'Times New Roman', serif;
     font-weight: 700;
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.2s;
+    font-size: clamp(2.5rem, 13vw, 16rem);
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
+    text-align: center;
+    white-space: nowrap;
 }
 
-.sidebar-header .home-link:hover {
-    color: var(--accent-primary);
+#demo-text, #subtext, #chat-button, .star-label {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-.sidebar h2 {
-    font-size: 0.8rem;
+#demo-text {
+    font-size: clamp(0.9rem, 1.5vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #d4a056;
+    /* color: #00bfff; */
+    text-shadow: 0 0 10px rgba(0, 191, 255, 0.7);
+}
+
+#subtext {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    max-width: 60ch;
+}
+
+#chat-button {
+    font-family: 'Trebuchet MS';
+    font-size: clamp(1rem, 1.8vw, 1.1rem);
     font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--text-secondary);
-    margin: 2rem 0 0;
-}
-
-.document-list {
+    color: #382800;
+    padding: 16px 40px;
     margin-top: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    /* background: linear-gradient(45deg, #0077b6, #00bfff); */
+    background: linear-gradient(45deg, #D4A056, #C69040);
+    border-bottom: 3px solid #8A651A;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease-in-out;
+    /* transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+                box-shadow 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); */
 }
 
-.document-item {
-    padding: 0.75rem 0.5rem;
-    border-radius: 6px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    transition: background-color 0.2s, color 0.2s;
-    cursor: default;
+#chat-button:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.05);
 }
 
-.document-item:hover {
-    background-color: var(--accent-primary-muted);
-    color: var(--text-primary);
+#chat-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-bottom-width: 2px;
+    filter: brightness(1);
 }
 
-.chat-interface {
-    flex-grow: 1;
+/* Starfield */
+.sky {
+    position: absolute;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    z-index: 1;
+    transition: transform 0.2s linear;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 1600px) {
+    .text-container {
+        align-items: flex-start;
+        gap: 0; 
+    }
+
+    #polaris-text {
+        font-size: clamp(16rem, 20vw, 22rem);
+        text-align: left;
+    }
+
+    #demo-text, #subtext, #chat-button {
+        margin-left: 0.5rem;
+    }
+
+    #demo-text { margin-top: 1rem; }
+    #subtext { margin-top: 1.5rem; text-align: left; }
+    #chat-button { margin-top: 2.5rem; }
+}
+
+.star-container {
+    position: absolute;
     display: flex;
     flex-direction: column;
-    background: var(--bg-primary);
-    width: 0;
+    align-items: center;
+    gap: 20px;
 }
 
-#chat-messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width:960px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    box-sizing: border-box;
-    /* Leave space for the fixed input area */
-    padding-bottom: 120px;
+.star-label {
+    position: absolute;
+    top: -25px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+    white-space: nowrap;
 }
 
-/* --- Messages (from original file) --- */
+.star {
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff; /* Simplified static shadow */
+    will-change: transform, opacity; /* Tell the browser to optimize this element */
+}
+
+@keyframes performant-glow {
+    from {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+    to {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+
+/* Polaris at center */
+#polaris-container {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+/* Star positions relative to Polaris */
+#sirius-container {
+    top: calc(50% + 270px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#vega-container {
+    top: calc(50% - 216px);
+    left: calc(50% + 324px);
+    transform: translate(-50%, -50%);
+}
+
+#betelgeuse-container {
+    top: calc(50% + 360px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#rigel-container {
+    top: calc(50% + 396px);
+    left: calc(50% + 144px);
+    transform: translate(-50%, -50%);
+}
+
+#arcturus-container {
+    top: calc(50% + 90px);
+    left: calc(50% - 450px);
+    transform: translate(-50%, -50%);
+}
+
+#capella-container {
+    top: calc(50% - 144px);
+    left: calc(50% - 270px);
+    transform: translate(-50%, -50%);
+}
+
+#altair-container {
+    top: calc(50% - 90px);
+    left: calc(50% + 504px);
+    transform: translate(-50%, -50%);
+}
+
+#aldebaran-container {
+    top: calc(50% + 324px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#spica-container {
+    top: calc(50% + 180px);
+    left: calc(50% - 324px);
+    transform: translate(-50%, -50%);
+}
+
+#deneb-container {
+    top: calc(50% - 324px);
+    left: calc(50% + 216px);
+    transform: translate(-50%, -50%);
+}
+
+#antares-container {
+    top: calc(50% + 450px);
+    left: calc(50% - 180px);
+    transform: translate(-50%, -50%);
+}
+
+#pollux-container {
+    top: calc(50% - 72px);
+    left: calc(50% - 144px);
+    transform: translate(-50%, -50%);
+}
+
+#castor-container {
+    top: calc(50% - 108px);
+    left: calc(50% - 108px);
+    transform: translate(-50%, -50%);
+}
+
+#regulus-container {
+    top: calc(50% + 144px);
+    left: calc(50% + 270px);
+    transform: translate(-50%, -50%);
+}
+
+#procyon-container {
+    top: calc(50% + 72px);
+    left: calc(50% - 216px);
+    transform: translate(-50%, -50%);
+}
+
+#achernar-container {
+    top: calc(50% + 504px);
+    left: calc(50% + 324px);
+    transform: translate(-50%, -50%);
+}
+
+#canopus-container {
+    top: calc(50% + 540px);
+    left: calc(50% - 450px);
+    transform: translate(-50%, -50%);
+}
+
+#alphard-container {
+    top: calc(50% + 234px);
+    left: calc(50% - 54px);
+    transform: translate(-50%, -50%);
+}
+
+#hadar-container {
+    top: calc(50% + 576px);
+    left: calc(50% - 324px);
+    transform: translate(-50%, -50%);
+}
+
+#mira-container {
+    top: calc(50% - 360px);
+    left: calc(50% - 396px);
+    transform: translate(-50%, -50%);
+}
+
+#enif-container {
+    top: calc(50% - 252px);
+    left: calc(50% + 450px);
+    transform: translate(-50%, -50%);
+}
+
+#fomalhaut-container {
+    top: calc(50% + 612px);
+    left: calc(50% + 90px);
+    transform: translate(-50%, -50%);
+}
+
+#merak-container {
+    top: calc(50% - 144px);
+    left: calc(50% + 108px);
+    transform: translate(-50%, -50%);
+}
+
+#alkaid-container {
+    top: calc(50% - 216px);
+    left: calc(50% + 36px);
+    transform: translate(-50%, -50%);
+}
+
+#mizar-container {
+    top: calc(50% - 198px);
+    left: calc(50% + 144px);
+    transform: translate(-50%, -50%);
+}
+
+/* Outer ring of stars - farther from center */
+#shaula-container {
+    top: calc(50% + 630px);
+    left: calc(50% - 576px);
+    transform: translate(-50%, -50%);
+}
+
+#kochab-container {
+    top: calc(50% - 504px);
+    left: calc(50% - 270px);
+    transform: translate(-50%, -50%);
+}
+
+#mirach-container {
+    top: calc(50% - 450px);
+    left: calc(50% + 504px);
+    transform: translate(-50%, -50%);
+}
+
+#alpheratz-container {
+    top: calc(50% - 576px);
+    left: calc(50% + 360px);
+    transform: translate(-50%, -50%);
+}
+
+#hamal-container {
+    top: calc(50% - 324px);
+    left: calc(50% - 576px);
+    transform: translate(-50%, -50%);
+}
+
+#diphda-container {
+    top: calc(50% + 684px);
+    left: calc(50% + 270px);
+    transform: translate(-50%, -50%);
+}
+
+#nunki-container {
+    top: calc(50% + 396px);
+    left: calc(50% - 630px);
+    transform: translate(-50%, -50%);
+}
+
+#saiph-container {
+    top: calc(50% + 540px);
+    left: calc(50% + 504px);
+    transform: translate(-50%, -50%);
+}
+
+#mintaka-container {
+    top: calc(50% + 450px);
+    left: calc(50% + 576px);
+    transform: translate(-50%, -50%);
+}
+
+#alhena-container {
+    top: calc(50% - 630px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#gacrux-container {
+    top: calc(50% + 720px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#elnath-container {
+    top: calc(50% - 540px);
+    left: calc(50% - 504px);
+    transform: translate(-50%, -50%);
+}
+
+#alioth-container {
+    top: calc(50% - 288px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#rasalhague-container {
+    top: calc(50% + 90px);
+    left: calc(50% + 684px);
+    transform: translate(-50%, -50%);
+}
+
+#kaus-australis-container {
+    top: calc(50% + 324px);
+    left: calc(50% - 684px);
+    transform: translate(-50%, -50%);
+}
+
+#avior-container {
+    top: calc(50% + 756px);
+    left: calc(50% + 450px);
+    transform: translate(-50%, -50%);
+}
+
+#menkalinan-container {
+    top: calc(50% - 684px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#atria-container {
+    top: calc(50% + 810px);
+    left: calc(50% - 180px);
+    transform: translate(-50%, -50%);
+}
+
+#alnair-container {
+    top: calc(50% + 684px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#peacock-container {
+    top: calc(50% + 576px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#mirzam-container {
+    top: calc(50% + 270px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#polaris-australis-container {
+    top: calc(50% + 864px);
+    left: calc(50% + 90px);
+    transform: translate(-50%, -50%);
+}
+
+#scheat-container {
+    top: calc(50% - 720px);
+    left: calc(50% + 576px);
+    transform: translate(-50%, -50%);
+}
+
+#markab-container {
+    top: calc(50% - 630px);
+    left: calc(50% + 684px);
+    transform: translate(-50%, -50%);
+}
+
+#menkar-container {
+    top: calc(50% - 504px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#sabik-container {
+    top: calc(50% + 180px);
+    left: calc(50% - 756px);
+    transform: translate(-50%, -50%);
+}
+
+#schedar-container {
+    top: calc(50% - 810px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#caph-container {
+    top: calc(50% - 756px);
+    left: calc(50% - 504px);
+    transform: translate(-50%, -50%);
+}
+
+#etamin-container {
+    top: calc(50% - 270px);
+    left: calc(50% + 756px);
+    transform: translate(-50%, -50%);
+}
+
+/* Far outer ring of stars - even farther from center */
+#acrux-container {
+    top: calc(50% + 900px);
+    left: calc(50% - 540px);
+    transform: translate(-50%, -50%);
+}
+
+#adhara-container {
+    top: calc(50% + 810px);
+    left: calc(50% - 810px);
+    transform: translate(-50%, -50%);
+}
+
+#castor-b-container {
+    top: calc(50% - 900px);
+    left: calc(50% + 270px);
+    transform: translate(-50%, -50%);
+}
+
+#shaula-b-container {
+    top: calc(50% + 990px);
+    left: calc(50% + 360px);
+    transform: translate(-50%, -50%);
+}
+
+#miaplacidus-container {
+    top: calc(50% + 864px);
+    left: calc(50% + 720px);
+    transform: translate(-50%, -50%);
+}
+
+#eltanin-container {
+    top: calc(50% - 810px);
+    left: calc(50% + 810px);
+    transform: translate(-50%, -50%);
+}
+
+#sadr-container {
+    top: calc(50% - 990px);
+    left: calc(50% - 180px);
+    transform: translate(-50%, -50%);
+}
+
+#naos-container {
+    top: calc(50% + 1080px);
+    left: calc(50% - 270px);
+    transform: translate(-50%, -50%);
+}
+
+#almach-container {
+    top: calc(50% - 864px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#caph-b-container {
+    top: calc(50% - 1080px);
+    left: calc(50% + 450px);
+    transform: translate(-50%, -50%);
+}
+
+#izar-container {
+    top: calc(50% + 270px);
+    left: calc(50% - 900px);
+    transform: translate(-50%, -50%);
+}
+
+#murzim-container {
+    top: calc(50% + 630px);
+    left: calc(50% + 810px);
+    transform: translate(-50%, -50%);
+}
+
+#alphard-b-container {
+    top: calc(50% - 630px);
+    left: calc(50% - 900px);
+    transform: translate(-50%, -50%);
+}
+
+#gienah-container {
+    top: calc(50% + 450px);
+    left: calc(50% - 864px);
+    transform: translate(-50%, -50%);
+}
+
+#zeta-puppis-container {
+    top: calc(50% + 1044px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#alsephina-container {
+    top: calc(50% - 936px);
+    left: calc(50% + 684px);
+    transform: translate(-50%, -50%);
+}
+
+#delta-velorum-container {
+    top: calc(50% + 1170px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#aspidiske-container {
+    top: calc(50% + 936px);
+    left: calc(50% - 936px);
+    transform: translate(-50%, -50%);
+}
+
+#suhail-container {
+    top: calc(50% + 1224px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#alphecca-container {
+    top: calc(50% - 450px);
+    left: calc(50% + 900px);
+    transform: translate(-50%, -50%);
+}
+
+#vindemiatrix-container {
+    top: calc(50% + 90px);
+    left: calc(50% + 990px);
+    transform: translate(-50%, -50%);
+}
+
+#phecda-container {
+    top: calc(50% - 1170px);
+    left: calc(50% - 360px);
+    transform: translate(-50%, -50%);
+}
+
+#megrez-container {
+    top: calc(50% - 1044px);
+    left: calc(50% - 630px);
+    transform: translate(-50%, -50%);
+}
+
+#gienah-corvi-container {
+    top: calc(50% + 720px);
+    left: calc(50% - 1080px);
+    transform: translate(-50%, -50%);
+}
+
+#kraz-container {
+    top: calc(50% + 540px);
+    left: calc(50% - 990px);
+    transform: translate(-50%, -50%);
+}
+
+#algorab-container {
+    top: calc(50% + 630px);
+    left: calc(50% - 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#markeb-container {
+    top: calc(50% + 1260px);
+    left: calc(50% - 450px);
+    transform: translate(-50%, -50%);
+}
+
+#sargas-container {
+    top: calc(50% + 1080px);
+    left: calc(50% - 720px);
+    transform: translate(-50%, -50%);
+}
+
+#avior-b-container {
+    top: calc(50% + 1350px);
+    left: calc(50% + 90px);
+    transform: translate(-50%, -50%);
+}
+
+#muscida-container {
+    top: calc(50% - 1260px);
+    left: calc(50% + 180px);
+    transform: translate(-50%, -50%);
+}
+
+#alderamin-container {
+    top: calc(50% - 990px);
+    left: calc(50% + 990px);
+    transform: translate(-50%, -50%);
+}
+
+#alfirk-container {
+    top: calc(50% - 1350px);
+    left: calc(50% - 90px);
+    transform: translate(-50%, -50%);
+}
+
+#ankaa-container {
+    top: calc(50% + 1170px);
+    left: calc(50% + 810px);
+    transform: translate(-50%, -50%);
+}
+
+#girtab-container {
+    top: calc(50% + 900px);
+    left: calc(50% - 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#zubenelgenubi-container {
+    top: calc(50% + 360px);
+    left: calc(50% + 1080px);
+    transform: translate(-50%, -50%);
+}
+
+#zubeneschamali-container {
+    top: calc(50% + 180px);
+    left: calc(50% + 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#unukalhai-container {
+    top: calc(50% - 180px);
+    left: calc(50% - 1080px);
+    transform: translate(-50%, -50%);
+}
+
+#sheratan-container {
+    top: calc(50% - 540px);
+    left: calc(50% - 1170px);
+    transform: translate(-50%, -50%);
+}
+
+#ruchbah-container {
+    top: calc(50% - 1224px);
+    left: calc(50% + 630px);
+    transform: translate(-50%, -50%);
+}
+
+#alfirk-b-container {
+    top: calc(50% - 1440px);
+    left: calc(50% + 360px);
+    transform: translate(-50%, -50%);
+}
+
+
+.star-label {
+    position: absolute;
+    top: -25px;
+    color: #fff;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#rigel-container .star-label {
+    top: auto;
+    bottom: -25px;
+}
+
+#pollux-container .star-label {
+    top: auto;
+    bottom: -25px;
+}
+
+#merak-container .star-label {
+    top: auto;
+    bottom: -25px;
+}
+
+#sirius {
+    width: 10px;
+    height: 10px;
+    animation: glow-bright 3s ease-in-out infinite alternate;
+}
+
+#vega {
+    width: 9px;
+    height: 9px;
+    animation: glow-bright 3.5s ease-in-out infinite alternate;
+}
+
+#betelgeuse {
+    width: 11px;
+    height: 11px;
+    background-color: #ffcccc;
+    animation: glow-red 4.5s ease-in-out infinite alternate;
+}
+
+#rigel {
+    width: 9px;
+    height: 9px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3s ease-in-out infinite alternate;
+}
+
+#arcturus {
+    width: 9px;
+    height: 9px;
+    background-color: #ffe0cc;
+    animation: glow-orange 4s ease-in-out infinite alternate;
+}
+
+#capella {
+    width: 8px;
+    height: 8px;
+    background-color: #ffffcc;
+    animation: glow-yellow 3.8s ease-in-out infinite alternate;
+}
+
+#altair {
+    width: 8px;
+    height: 8px;
+    animation: glow 3.2s ease-in-out infinite alternate;
+}
+
+#aldebaran {
+    width: 9px;
+    height: 9px;
+    background-color: #ffddcc;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+#spica {
+    width: 8px;
+    height: 8px;
+    background-color: #ccccff;
+    animation: glow-blue 3.6s ease-in-out infinite alternate;
+}
+
+/* Additional star styles */
+#deneb {
+    width: 9px;
+    height: 9px;
+    animation: glow-bright 3.8s ease-in-out infinite alternate;
+}
+
+#antares {
+    width: 10px;
+    height: 10px;
+    background-color: #ff9999;
+    animation: glow-red 5s ease-in-out infinite alternate;
+}
+
+#pollux, #castor {
+    width: 7px;
+    height: 7px;
+    background-color: #ffffdd;
+    animation: glow-yellow 3.5s ease-in-out infinite alternate;
+}
+
+#regulus {
+    width: 8px;
+    height: 8px;
+    background-color: #ddddff;
+    animation: glow-blue 3.3s ease-in-out infinite alternate;
+}
+
+#procyon {
+    width: 8px;
+    height: 8px;
+    background-color: #fffff0;
+    animation: glow 3.4s ease-in-out infinite alternate;
+}
+
+#achernar, #canopus {
+    width: 9px;
+    height: 9px;
+    animation: glow-bright 3.7s ease-in-out infinite alternate;
+}
+
+#alphard {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0b0;
+    animation: glow-orange 4.1s ease-in-out infinite alternate;
+}
+
+#hadar {
+    width: 8px;
+    height: 8px;
+    background-color: #ccddff;
+    animation: glow-blue 3.4s ease-in-out infinite alternate;
+}
+
+#mira {
+    width: 8px;
+    height: 8px;
+    background-color: #ffcccc;
+    animation: glow-red 6s ease-in-out infinite alternate;
+}
+
+#enif {
+    width: 7px;
+    height: 7px;
+    background-color: #ffc0a0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#fomalhaut {
+    width: 8px;
+    height: 8px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#merak, #alkaid, #mizar {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.5s ease-in-out infinite alternate;
+}
+
+/* New outer stars */
+#shaula, #nunki, #kaus-australis {
+    width: 7px;
+    height: 7px;
+    background-color: #d0d0ff;
+    animation: glow-blue 3.7s ease-in-out infinite alternate;
+}
+
+#kochab {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0a0;
+    animation: glow-orange 4s ease-in-out infinite alternate;
+}
+
+#mirach, #alpheratz, #hamal {
+    width: 7px;
+    height: 7px;
+    background-color: #ffdddd;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#diphda, #menkar {
+    width: 8px;
+    height: 8px;
+    background-color: #ffc0a0;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+#saiph, #mintaka {
+    width: 7px;
+    height: 7px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3.3s ease-in-out infinite alternate;
+}
+
+#alhena, #elnath {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#gacrux {
+    width: 7px;
+    height: 7px;
+    background-color: #ff9999;
+    animation: glow-red 4.5s ease-in-out infinite alternate;
+}
+
+#alioth, #menkalinan {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.5s ease-in-out infinite alternate;
+}
+
+#rasalhague {
+    width: 7px;
+    height: 7px;
+    background-color: #f0f0f0;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#avior {
+    width: 8px;
+    height: 8px;
+    background-color: #ffd0b0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#atria {
+    width: 8px;
+    height: 8px;
+    background-color: #ffc0c0;
+    animation: glow-orange 4.1s ease-in-out infinite alternate;
+}
+
+#alnair, #peacock {
+    width: 7px;
+    height: 7px;
+    background-color: #e8e8ff;
+    animation: glow-blue 3.6s ease-in-out infinite alternate;
+}
+
+#mirzam {
+    width: 6px;
+    height: 6px;
+    background-color: #d0d0ff;
+    animation: glow-blue 3.4s ease-in-out infinite alternate;
+}
+
+#polaris-australis {
+    width: 6px;
+    height: 6px;
+    animation: glow 4s ease-in-out infinite alternate;
+}
+
+#scheat, #markab {
+    width: 7px;
+    height: 7px;
+    background-color: #ffe0e0;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#sabik {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#schedar, #caph {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0a0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#etamin {
+    width: 7px;
+    height: 7px;
+    background-color: #ffc090;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+/* Far outer stars */
+#acrux, #gacrux {
+    width: 8px;
+    height: 8px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3.5s ease-in-out infinite alternate;
+}
+
+#adhara {
+    width: 8px;
+    height: 8px;
+    background-color: #f0f0ff;
+    animation: glow-bright 3.3s ease-in-out infinite alternate;
+}
+
+#castor-b, #shaula-b {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#miaplacidus {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#eltanin, #sadr {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0a0;
+    animation: glow-orange 4.1s ease-in-out infinite alternate;
+}
+
+#naos {
+    width: 7px;
+    height: 7px;
+    background-color: #c0c0ff;
+    animation: glow-blue 3.2s ease-in-out infinite alternate;
+}
+
+#almach {
+    width: 7px;
+    height: 7px;
+    background-color: #ffc0b0;
+    animation: glow-orange 3.9s ease-in-out infinite alternate;
+}
+
+#caph-b, #izar {
+    width: 6px;
+    height: 6px;
+    background-color: #ffe0cc;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#murzim, #alphard-b {
+    width: 6px;
+    height: 6px;
+    background-color: #e0e0ff;
+    animation: glow-blue 3.5s ease-in-out infinite alternate;
+}
+
+#gienah, #gienah-corvi {
+    width: 6px;
+    height: 6px;
+    background-color: #f0f0f0;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#zeta-puppis {
+    width: 7px;
+    height: 7px;
+    background-color: #b0b0ff;
+    animation: glow-blue 3.1s ease-in-out infinite alternate;
+}
+
+#alsephina, #delta-velorum {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.9s ease-in-out infinite alternate;
+}
+
+#aspidiske, #suhail {
+    width: 7px;
+    height: 7px;
+    background-color: #ffd0c0;
+    animation: glow-orange 4s ease-in-out infinite alternate;
+}
+
+#alphecca {
+    width: 7px;
+    height: 7px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#vindemiatrix {
+    width: 6px;
+    height: 6px;
+    background-color: #ffffe0;
+    animation: glow-yellow 3.8s ease-in-out infinite alternate;
+}
+
+#phecda, #megrez {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#kraz, #algorab {
+    width: 6px;
+    height: 6px;
+    background-color: #f0f0f0;
+    animation: glow 3.9s ease-in-out infinite alternate;
+}
+
+#markeb, #sargas {
+    width: 6px;
+    height: 6px;
+    background-color: #d0d0ff;
+    animation: glow-blue 3.6s ease-in-out infinite alternate;
+}
+
+#avior-b {
+    width: 6px;
+    height: 6px;
+    background-color: #ffd0b0;
+    animation: glow-orange 4.0s ease-in-out infinite alternate;
+}
+
+#muscida {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#alderamin {
+    width: 7px;
+    height: 7px;
+    background-color: #f5f5f5;
+    animation: glow 3.9s ease-in-out infinite alternate;
+}
+
+#alfirk {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.6s ease-in-out infinite alternate;
+}
+
+#ankaa {
+    width: 6px;
+    height: 6px;
+    background-color: #ffc0a0;
+    animation: glow-orange 4.2s ease-in-out infinite alternate;
+}
+
+#girtab {
+    width: 7px;
+    height: 7px;
+    background-color: #d0e0ff;
+    animation: glow-blue 3.5s ease-in-out infinite alternate;
+}
+
+#zubenelgenubi, #zubeneschamali {
+    width: 7px;
+    height: 7px;
+    background-color: #e0f0ff;
+    animation: glow-bright 3.4s ease-in-out infinite alternate;
+}
+
+#unukalhai {
+    width: 6px;
+    height: 6px;
+    background-color: #ffe0c0;
+    animation: glow-orange 4.0s ease-in-out infinite alternate;
+}
+
+#sheratan {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.7s ease-in-out infinite alternate;
+}
+
+#ruchbah {
+    width: 6px;
+    height: 6px;
+    animation: glow 3.8s ease-in-out infinite alternate;
+}
+
+#alfirk-b {
+    width: 5px;
+    height: 5px;
+    animation: glow 4.0s ease-in-out infinite alternate;
+}
+
+
+/* Specific color glows */
+@keyframes glow-bright {
+    from {
+        box-shadow: 0 0 12px #fff, 0 0 25px #fff, 0 0 35px #fff, 0 0 45px #f0f0f0;
+    }
+    to {
+        box-shadow: 0 0 18px #fff, 0 0 30px #fff, 0 0 40px #fff, 0 0 60px #f0f0f0;
+    }
+}
+
+@keyframes glow-red {
+    from {
+        box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff3333, 0 0 40px #ff6666;
+    }
+    to {
+        box-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000, 0 0 35px #ff3333, 0 0 50px #ff6666;
+    }
+}
+
+@keyframes glow-blue {
+    from {
+        box-shadow: 0 0 10px #0000ff, 0 0 20px #0000ff, 0 0 30px #3333ff, 0 0 40px #6666ff;
+    }
+    to {
+        box-shadow: 0 0 15px #0000ff, 0 0 25px #0000ff, 0 0 35px #3333ff, 0 0 50px #6666ff;
+    }
+}
+
+@keyframes glow-orange {
+    from {
+        box-shadow: 0 0 10px #ffa500, 0 0 20px #ffa500, 0 0 30px #ffb533, 0 0 40px #ffc566;
+    }
+    to {
+        box-shadow: 0 0 15px #ffa500, 0 0 25px #ffa500, 0 0 35px #ffb533, 0 0 50px #ffc566;
+    }
+}
+
+@keyframes glow-yellow {
+    from {
+        box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff33, 0 0 40px #ffff66;
+    }
+    to {
+        box-shadow: 0 0 15px #ffff00, 0 0 25px #ffff00, 0 0 35px #ffff33, 0 0 50px #ffff66;
+    }
+}
+
+/* --- Additions for Chat Interface --- */
+
+/* General message styling */
 .message {
     display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    position: relative;
-    max-width: 100%;
-}
-
-/* Apply base font size and line height directly to content elements */
-.bot-message-content,
-.user-message-content {
-    font-family: var(--font-family-sans); /* Ensure consistent font family */
-    font-size: var(--chat-message-font-size-clamped); /* Use the clamped size */
-    font-weight: 400;
-    line-height: var(--chat-message-line-height); /* Consistent line height */
-    overflow-wrap: break-word; /* Ensure long words break */
-    word-break: break-word; /* Ensure long words break for all browsers */
-}
-
-/* Specific styling for paragraphs inside bot messages to ensure consistent spacing */
-/* Remove this .message p rule as it's being overridden by bot/user-message-content */
-/* .message p {
-    line-height: 1.65;
-    font-size: clamp(0.9rem, 0.45vw + 0.45rem, 1.15rem);
-    overflow-wrap: break-word;
-} */
-
-
-.bot-message {
-    align-self: flex-start;
-}
-
-.bot-message-content {
-    /* background: var(--bg-secondary); Removed background for a cleaner look if desired */
-    padding: 0.8rem 1.3rem;
-    border-radius: 4px 18px 18px 18px;
-    color: var(--text-primary);
-    font-weight: 400;
-    /* font-size: 1rem; -- This is now handled by .bot-message-content, .user-message-content above */
-}
-
-/* --- Markdown Content Styling for Bot Messages --- */
-
-.bot-message-content p {
-    margin-bottom: 1em; /* Add spacing between paragraphs */
-}
-
-/* Remove bottom margin from the last paragraph in a message to avoid extra space */
-.bot-message-content p:last-child {
-    margin-bottom: 0;
-}
-
-.bot-message-content ul,
-.bot-message-content ol {
-    margin-top: 1em; /* Add space above lists */
-    margin-bottom: 1em; /* Add space below lists */
-    padding-left: 1.5em; /* Indent lists for bullet points/numbers */
-}
-
-.bot-message-content li {
-    margin-bottom: 0.5em; /* Space between list items */
-    /* font-size: 1rem; -- This is now inherited from .bot-message-content */
-    line-height: var(--chat-message-line-height); /* Ensure good line spacing for list items, consistent with messages */
-}
-
-
-/* Headings within bot messages */
-.bot-message-content h1,
-.bot-message-content h2,
-.bot-message-content h3,
-.bot-message-content h4,
-.bot-message-content h5,
-.bot-message-content h6 {
-    margin-top: 1.5em; /* Space above headings */
-    margin-bottom: 0.8em; /* Space below headings */
-    font-weight: 600; /* Make headings bolder */
-    color: var(--text-primary);
-    /* Adjust font sizes relative to the base chat-message-font-size-clamped */
-}
-
-.bot-message-content h1 { font-size: calc(var(--chat-message-font-size-clamped) * 1.8); }
-.bot-message-content h2 { font-size: calc(var(--chat-message-font-size-clamped) * 1.5); }
-.bot-message-content h3 { font-size: calc(var(--chat-message-font-size-clamped) * 1.3); }
-.bot-message-content h4 { font-size: calc(var(--chat-message-font-size-clamped) * 1.1); }
-.bot-message-content h5 { font-size: calc(var(--chat-message-font-size-clamped) * 1.05); }
-.bot-message-content h6 { font-size: var(--chat-message-font-size-clamped); }
-
-
-/* Table styling within bot messages */
-.bot-message-content table {
+    align-items: flex-start; /* Aligns avatar/icon with the top of the message */
+    gap: 16px;
     width: 100%;
-    border-collapse: collapse;
-    margin: 1em 0;
-    font-size: calc(var(--chat-message-font-size-clamped) * 0.95); /* Adjust relative to base */
+    margin-bottom: 1.5rem;
+    padding: 0 1rem; /* Add some horizontal padding */
+    box-sizing: border-box;
 }
 
-.bot-message-content th,
-.bot-message-content td {
+/* AI message specific styling */
+.ai-message .message-content {
+    background-color: var(--bg-secondary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-top-left-radius: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* User message specific styling */
+.user-message {
+    justify-content: flex-end; /* Aligns user message to the right */
+}
+
+.user-message .message-content {
+    background-color: var(--accent-primary-muted);
     border: 1px solid var(--border-primary);
-    padding: 0.6em 0.8em;
-    text-align: left;
-}
-
-.bot-message-content th {
-    background-color: var(--bg-tertiary);
-    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-top-right-radius: 0;
     color: var(--text-primary);
 }
 
-.bot-message-content tr:nth-child(even) {
-    background-color: var(--bg-secondary);
-}
 
-/* Blockquotes within bot messages */
-.bot-message-content blockquote {
-    border-left: 4px solid var(--accent-primary);
-    padding-left: 1em;
-    margin: 1em 0;
-    color: var(--text-secondary);
-    font-style: italic;
-    font-size: var(--chat-message-font-size-clamped); /* Ensure it matches base font size */
-}
-
-/* Images within bot messages */
-.bot-message-content img {
-    max-width: 100%;
-    height: auto;
-    display: block; /* Remove extra space below image */
-    margin: 1em 0;
-    border-radius: 4px;
-}
-
-/* Links within bot messages */
-.bot-message-content a {
-    color: var(--accent-primary);
-    text-decoration: underline;
-}
-
-.bot-message-content a:hover {
-    color: var(--accent-primary-hover);
-    text-decoration: none;
-}
-
-.user-message {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-
-.user-message-content {
-    background-color: var(--accent-primary);
-    color: #000; /* Assuming black text on the accent primary for user bubbles */
-    font-weight: 400;
-    padding: 0.8rem 1.3rem;
-    border-radius: 18px 4px 18px 18px;
-    /* font-size and line-height are now handled by the combined rule above */
-}
-
-/* --- Welcome Screen (New) --- */
-.welcome-container {
-    flex: 1;
+/* Pulsating Circle Styles */
+.pulsating-circle-container {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0; /* Prevents the container from shrinking */
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    margin: auto;
+    margin-top: 6px; /* Aligns the circle nicely with the first line of text */
 }
 
-.polaris-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 2rem;
-    color: var(--accent-primary);
-    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
-    animation: pulse 2s ease-in-out infinite;
+.pulsating-circle {
+    width: 10px;
+    height: 10px;
+    background-color: var(--accent-primary);
+    border-radius: 50%;
+    /* The animation magic! */
+    animation: pulse 1.5s infinite ease-in-out;
 }
 
-.welcome-title {
-    font-size: 2.5rem;
-    font-weight: 300;
-    letter-spacing: -0.025em;
-    animation: fadeInUp 0.8s ease-out;
-}
-
-.welcome-title .gradient-text {
-    background: linear-gradient(135deg, #60a5fa 0%, #c084fc 50%, #f472b6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 500;
-    animation: gradientShift 8s ease infinite;
-    background-size: 200% 200%;
-}
-
+/* Keyframe animation for the pulse effect */
 @keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
     }
     50% {
-        transform: scale(1.05);
-        filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.7));
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
     }
 }
 
-@keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
+/* --- Logic for Hiding/Showing Elements --- */
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- Input Area (New) --- */
-.input-area {
-    position: fixed;
-    bottom: 0;
-    left: 260px; /* Width of sidebar */
-    right: 0;
-    padding: 1.5rem;
-    background: linear-gradient(to top, var(--bg-primary) 50%, transparent);
-}
-
-.input-wrapper {
-    max-width: 768px;
-    margin: 0 auto;
-}
-
-.chat-input-form {
-    width: 100%;
-}
-
-.message-input-wrapper {
-    display: flex;
-    align-items: center;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
-    border-radius: 24px;
-    padding: 0.75rem 0.75rem 0.75rem 1.5rem;
-    gap: 0.75rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-.message-input-wrapper:focus-within {
-    border-color: var(--accent-primary);
-    background-color: var(--bg-secondary);
-}
-
-#message-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    padding: 0;
-    color: var(--text-primary);
-    font-size: 1rem; /* Base font size for input */
-    font-family: var(--font-family-sans);
-    line-height: 1.5;
-    resize: none;
-    overflow-y: hidden;
-    min-height: 1.5rem; /* 24px */
-    max-height: 120px;
-}
-
-#message-input::placeholder {
-    color: var(--text-secondary); /* Changed from var(--text-muted) which wasn't defined */
-}
-
-.send-button-container button {
-    height: 32px;
-    width: 32px;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    background: var(--accent-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    padding: 0;
-    opacity: 0.9;
-}
-
-.send-button-container button:hover {
-    opacity: 1;
-    transform: scale(1.05);
-    background: var(--accent-primary-hover);
-}
-
-.stop-button-container button {
-    height: 32px;
-    width: 32px;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    background: var(--accent-primary); /* A more neutral background for stop */
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    padding: 0;
-    opacity: 0.9;
-}
-
-.stop-button-container button:hover:not(:disabled) {
-    opacity: 1;
-    transform: scale(1.05);
-    background: #e74c3c; /* Red color for stop on hover */
-    color: white;
-}
-
-.stop-button-container button:disabled {
-    cursor: not-allowed;
-    opacity: 0.3;
-}
-
-/* --- Code Blocks (from original file) --- */
-.bot-message pre {
-    background-color: var(--code-block-bg); /*--code-block-bg*/
-    color: var(--code-text-color);
-    padding: 1rem;
-    border-radius: 8px;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    font-size: 0.95em; /* Keep relative to parent font-size */
-    line-height: 1.5;
-    margin-top: 1rem;
-}
-
-.bot-message code:not(pre > code) {
-    background-color: var(--bg-tertiary); /* --accent-primary-mute */
-    color: var(--text-primary);
-    padding: 0.2em 0.4em;
-    border-radius: 4px;
-    font-size: 0.95em; /* Keep relative to parent font-size */
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-}
-
-/* --- Responsive --- */
-@media (max-width: 900px) {
-    .sidebar {
-        display: none; /* Or transform: translateX(-100%); for a toggleable sidebar */
-    }
-    .input-area {
-        left: 0;
-    }
-    #chat-messages {
-        padding: 1rem;
-        padding-bottom: 120px;
-    }
-}
-/* --- Sidebar Enhancements --- */
-
-/* Make header more flexible for the button */
-.sidebar-header {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.new-chat-button {
-    width: 100%;
-    margin-block: 1.5rem;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 10px 12px;
-    border-radius: 8px;
-    background-color: var(--accent-primary);
-    border: none;
-    color: var(--text-on-accent); /* This variable is not defined, consider changing to white or text-primary */
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px; /* !important is often not needed, try removing it first */
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.new-chat-button:hover {
-    background-color: var(--bg-secondary);
-    border-color: var(--accent-primary);
-}
-
-.sidebar-divider {
-    height: 1px;
-    background-color: var(--border-primary);
-    margin: 1.5rem 0;
-}
-
-/* Renamed h2 for better targeting */
-.sidebar-subheading {
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    padding: 0 0.5rem;
-}
-
-.document-list {
-    margin-top: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-/* This replaces your old .document-item style */
-.document-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background-color 0.2s, color 0.2s;
-    cursor: pointer;
-}
-
-.document-item:hover {
-    background-color: var(--accent-primary-muted);
-    color: var(--text-primary);
-}
-
-/* Style for the currently selected item */
-.document-item.active {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-}
-
-.document-item svg {
-    flex-shrink: 0; /* Prevents icon from shrinking */
-    color: var(--text-secondary); /* Changed from var(--text-muted) */
-}
-
-/* Style for bot-info messages */
-.bot-info-message {
-    align-self: flex-start; /* Or center if you prefer for info messages */
-    text-align: center;
-    width: 100%;
-    color: var(--text-secondary);
-    font-style: italic;
-    font-size: calc(var(--chat-message-font-size-clamped) * 0.85); /* Slightly smaller than main text */
-}
-
-.bot-info-message .bot-info-message-content {
-    background: var(--bg-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    display: inline-block; /* To make background fit content */
-    max-width: 80%; /* Prevent stretching too wide */
-    margin: 0 auto; /* Center the block */
-}
-/* --- Custom Scrollbar Styles --- */
-
-#chat-messages {
-    /* Existing overflow-y: auto; or overflow-y: scroll; should be here */
-    overflow-y: auto;
-}
-
-/* For WebKit browsers (Chrome, Safari, newer Edge) */
-#chat-messages::-webkit-scrollbar {
-    width: 8px; /* Width of the vertical scrollbar */
-    /* For horizontal scrollbars, you'd use height: 8px; */
-}
-
-#chat-messages::-webkit-scrollbar-track {
-    background: #2a2c37; /* Color of the scrollbar track */
-    border-radius: 10px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb {
-    background-color: #555866; /* Color of the scrollbar thumb */
-    border-radius: 10px;
-    border: 2px solid #2a2c37; /* Border to create a "floating" effect if desired */
-}
-
-#chat-messages::-webkit-scrollbar-thumb:hover {
-    background-color: #6a6e80; /* Color of the thumb on hover */
-}
-
-/* Optional: Hide scrollbar buttons (arrows) if not needed */
-#chat-messages::-webkit-scrollbar-button {
+/* When .generating is active, hide the text content */
+.ai-message.generating .message-content {
     display: none;
 }
 
-/* For Firefox */
-#chat-messages {
-    scrollbar-width: thin; /* 'auto' | 'thin' | 'none' */
-    scrollbar-color: #555866 #2a2c37; /* thumb color | track color */
+/* When .generating is NOT active, hide the pulsating circle */
+.ai-message:not(.generating) .pulsating-circle-container {
+    display: none;
 }
