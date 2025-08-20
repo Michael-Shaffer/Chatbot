@@ -178,20 +178,9 @@ class Retriever:
         results: List[Dict[str, Any]] = []
         # 1) pack normal content blocks
         for idx in top_ids:
-            m = self.meta[idx]
-            results.append(
-                {
-                    "block_id": m.get("block_id"),
-                    "doc_id": m.get("doc_id"),
-                    "page": m.get("page"),
-                    "block_type": m.get("block_type", "paragraph"),
-                    "section_path": m.get("section_path", ""),
-                    "section_label": m.get("section_label", ""),
-                    "section_intro": m.get("section_intro", ""),
-                    "text": self.sparse_texts[idx],
-                    "page_md_path": m.get("page_md_path"),
-                }
-            )
+            chunk = self.meta[idx].copy()
+            chunk['text'] = self.sparse_texts[idx]
+            results.append(chunk)
 
         if not self.append_page_excerpt or self.page_excerpt_limit <= 0:
             return results
